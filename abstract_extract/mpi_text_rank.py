@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-    
 import re
 import time
+import math
 import nltk
 import MySQLdb
 import mpi4py.MPI as MPI
 
 from pymongo import MongoClient
 from nltk.tokenize import word_tokenize
-# from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-
-twitter_stop_words = ["after", "be", "do", "find", "new", "take", "know", "need", "first", "good", "use", "big", "come", "see", "great", "more", "look", "make", "get","have", "from","TO","to","https","RT","URL","in","re","thank","thanks","today","yesterday","tomorrow","night","tonight","day","year","last","oh","yeah","amp"]
 
 stop_words = {}
 
@@ -30,129 +28,148 @@ def read_stop_words():
 '''
 def preprocess(text):
 	# clear @/#/http
-	text = re.sub(r'[@|#][\d|\w|_]+|http[\w|:|.|/|\d]+',"",text)
-	if text == "" or text == None:
-		return [] 
+	text = re.sub(r'[@|#][\d|\w|_]+|http[\w|:|.|/|\d]+|RT(.)+?:(.)+?(:.)?|\n',"",text)
+	text = re.sub(r'new york|NEW YORK|New York',"NewYork",text)
+	text = text.strip()
+	if text == None or len(text) < 11:
+		return [None, None] 
 
+	_text = text
 	text = text.lower()
 	words_list = []
 	words = word_tokenize(text),
 	words = words[0]
 
 	for word in words:
-		# if word not in (stopwords.words("english") and twitter_stop_words):  # clear stopwords
 		if word not in stop_words:
 			if len(word) > 2 and word.isalpha():
 				words_list.append(word)
+
+	if len(words_list) < 3:
+		return [None, None] 
+
 	try:
 		pos = nltk.pos_tag(words_list)
 	except Exception as e:
 		print e
 		pos = []
 
- 	res = []
+ 	res = set()
 	lemmatizer = WordNetLemmatizer()
-	# single_pattern = ["N", "J", "V"]
 
 	for w in pos:
 		if w[1][0] == 'N':
 			word = lemmatizer.lemmatize(w[0])  # 词形归并
-			if word not in stop_words and len(word) < 13:
-				res.append(word)
-
-			# res.append((word, w[1]))
+			if word not in stop_words and len(word) < 15:
+				res.add(word)
 
 		elif w[1][0] == 'J':
 			word = lemmatizer.lemmatize(w[0], 'a')  # 词形归并
-			if word not in stop_words and len(word) < 13:
-				res.append(word)
-
-			# res.append((word, w[1]))
+			if word not in stop_words and len(word) < 15:
+				res.add(word)
 
 		elif w[1][0] == 'V':
 			word = lemmatizer.lemmatize(w[0], 'v')  # 词形归并
-			if word not in stop_words and len(word) < 13:
-				res.append(word)
+			if word not in stop_words and len(word) < 15:
+				res.add(word)
 
-			# res.append((word, w[1]))
+	if len(res) < 3:
+		return [None, None] 
 
-	return res
+	return [res, _text]
+
+'''
+计算所有句子的相似度
+'''
+def calculate_similarity(tweet_list):
+	similarity = [[0] * len(tweet_list)] * len(tweet_list)
+	length = len(tweet_list)
+
+	for i in range(length):
+		for j in range(i + 1, length):
+			res = calc_similarity_sentence(tweet_list[i], tweet_list[j])
+			similarity[i][j] = res
+			similarity[j][i] = res
+
+	return similarity
+
+'''
+计算两个句子的相似度
+'''
+def calc_similarity_sentence(s1, s2):
+	return len(s1 & s2) * 1.0 / (math.log(len(s1), 2) + math.log(len(s2), 2))
 
 '''
 计算共现窗口
 '''
-def get_word_cooccurrence(word_list):
-	co_window = {}
-	co_window_width = 6
+def get_tweet_cooccurrence(tweet_list):
+	co_window = []
+	co_window_width = 10
 
-	for w in word_list:
-		co_window[w] = None
-
-	length = len(word_list)
+	length = len(tweet_list)
 	for index in range(length):
-		w = word_list[index]
-		related_set = None
-		if not co_window[w]:
-			related_set = set()
-			co_window[w] = related_set
-		else:
-			related_set = co_window[w]
-
 		lower_bound = (index - co_window_width) > 0 and index - co_window_width or 0
 		upper_bound = (index + co_window_width) < length and index + co_window_width or length - 1  # 包含upper_bound
 
-		i = lower_bound
-		while i <= upper_bound:
-			related_set.add(word_list[i])
-			i += 1
-
-	for w in co_window:
-		co_window[w].remove(w)
+		co_window.append([lower_bound, upper_bound]) 
 
 	return co_window
 
 '''
-计算得分最高的单词作为关键词
+计算得分最高的句子作为摘要
 '''
-def get_topk_word(co_window, k = -1):
+def get_topk_sentence(similarity, co_window, count = -1):
 	max_iter = 1000000
-	pre_item_score = {}
-
-	for w in co_window:
-		pre_item_score[w] = 1
+	pre_item_score = [1] * len(co_window)
 
 	i = 0
 	d = 0.85
+	length = len(similarity)
+
 	while i < max_iter:
 		i += 1
 		item_score = {}
 
-		for w in co_window:
+		for index in range(length):
 			sum = 0
-			for item in co_window[w]:
-				sum += (1.0 / len(co_window[item])) * pre_item_score[item]
-				
-			item_score[w] = d * sum + (1 - d)
+			for j in range(co_window[index][0], co_window[index][1] + 1):
+				if j == index:
+					continue
+
+				denominator = 0
+				for k in range(co_window[j][0], co_window[j][1] + 1):
+					if k != j:
+						denominator += similarity[k][j]
+
+				if similarity[index][j] != 0:
+					sum += (similarity[index][j] * 1.0 / denominator) * pre_item_score[j]
+			
+			try:
+				item_score[index] = d * sum + (1 - d)
+			except Exception as e:
+				print e
 		
 		if calc_differ(pre_item_score, item_score) < 0.1:
 			break
 
-		pre_item_score =  item_score
+		pre_item_score = item_score
 
 	res = sorted(item_score.iteritems(), key = lambda v: v[1], reverse = True)
 
-	if k == -1:
+	if count == -1:
 		return res
 
-	return res[0 : k]
+	return res[0 : count]
 
 '''
 计算两次迭代的得分差，判断终止条件
 '''
 def calc_differ(score1, score2):
 	res = 0
-	for item in score1:
-		res += abs(score1[item] - score2[item])
+	length = len(score1)
+
+	for i in range(length):
+		res += abs(score1[i] - score2[i])
 
 	return res
 
@@ -174,6 +191,29 @@ def get_user_info():
 		print e
 
 	return user_list
+
+'''
+执行
+'''
+def exe_process(tweet_list, k = -1):
+	tweets_tp1 = []
+	tweets_tp2 = []
+
+	for tweet in tweet_list:
+		out = preprocess(tweet)
+		if out[0]:
+			tweets_tp1.append(out[0])
+			tweets_tp2.append(out[1])
+
+	coo = get_tweet_cooccurrence(tweets_tp1)
+	similarity = calculate_similarity(tweets_tp1)
+	out = get_topk_sentence(similarity, coo, k)
+
+	res = []
+	for item in out:
+		res.append(tweets_tp2[item[0]])
+		
+	return res
 
 '''
 数据分发
@@ -201,21 +241,11 @@ def data_distribution():
 
 	return data
 
-'''
-执行
-'''
-def exe_process(text, k = -1):
-	pos = preprocess(text)
-	coo = get_word_cooccurrence(pos)
-	res = get_topk_word(coo, k)
-
-	return res
-
 
 def main():
 	read_stop_words()
 	data = data_distribution()
-	
+
 	client = MongoClient('127.0.0.1', 27017)
 	db = client['twitter']
 	collect = db['tweets']
@@ -227,16 +257,18 @@ def main():
 	for user_id in data:
 		text = ""
 		tweets = collect.find({'user_id': long(user_id)}, {"text": 1})
-
+		tweet_list = []
 		for tt in tweets:
-			text += tt['text']
+			tweet_list.append(tt['text'])
 
-		topk = exe_process(text, 30)
-		text = ""
-		for w in topk:
-			text += w[0] + " "
+		abstract = exe_process(tweet_list, 6)
+		
+		abs_res = ""
+		for sentence in abstract:
+			abs_res += sentence + "\n"
 
-		sql = "insert into user_interest(user_id, user_interest) values('%s', '%s')" % (user_id, text)
+		sql = '''update user_interest set abstract = '%s' where user_id = '%s' ''' % (abs_res.replace("'","\\'").replace('"','\\"'), user_id)
+
 		try:
 			cursor.execute(sql)
 			db.commit()

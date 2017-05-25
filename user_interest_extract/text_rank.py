@@ -1,15 +1,27 @@
-# -*- coding: utf-8 -*-  
+# -*- coding: utf-8 -*-    
 import re
+import time
 import nltk
 import MySQLdb
 
+from pymongo import MongoClient
 from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
+# from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
+twitter_stop_words = ["after", "be", "do", "find", "new", "take", "know", "need", "first", "good", "use", "big", "come", "see", "great", "more", "look", "make", "get","have", "from","TO","to","https","RT","URL","in","re","thank","thanks","today","yesterday","tomorrow","night","tonight","day","year","last","oh","yeah","amp"]
 
-text = 'a smart clever clever Season dog clever Bobby Moynihan Departing Saturday Night clear smart Seasons Live After 9 Seasons'
-twitter_stop_words = ["after", "from","TO","to","https","RT","URL","in","re","thank","thanks","today","yesterday","tomorrow","night","tonight","day","year","last","oh","yeah","amp"]
+stop_words = {}
+
+'''
+读取停用词
+'''
+def read_stop_words():
+	f = open("../data/stop_word.txt", "r")  
+	for line in f:  
+	    stop_words[line[0 : -1]] = 1
+
+	f.close()  
 
 '''
 步骤一：数据预处理
@@ -18,90 +30,91 @@ twitter_stop_words = ["after", "from","TO","to","https","RT","URL","in","re","th
 def preprocess(text):
 	# clear @/#/http
 	text = re.sub(r'[@|#][\d|\w|_]+|http[\w|:|.|/|\d]+',"",text)
-
 	if text == "" or text == None:
 		return [] 
 
-	wordslist = []
+	text = text.lower()
+	words_list = []
 	words = word_tokenize(text),
 	words = words[0]
 
 	for word in words:
-		word = word.lower()
-		if word not in (stopwords.words("english") and twitter_stop_words):  # clear stopwords
+		# if word not in (stopwords.words("english") and twitter_stop_words):  # clear stopwords
+		if word not in stop_words:
 			if len(word) > 2 and word.isalpha():
-				wordslist.append(word)
+				words_list.append(word)
 	try:
-		pos = nltk.pos_tag(wordslist)
+		pos = nltk.pos_tag(words_list)
 	except Exception as e:
 		print e
 		pos = []
 
  	res = []
 	lemmatizer = WordNetLemmatizer()
-	single_pattern = ["N", "J", "V"]
-	for w in pos:
-		if word in (stopwords.words("english") and twitter_stop_words) or len(word) > 20:   # 删除停用词
-			continue
+	# single_pattern = ["N", "J", "V"]
 
+	for w in pos:
 		if w[1][0] == 'N':
 			word = lemmatizer.lemmatize(w[0])  # 词形归并
-			res.append((word, w[1]))
+			if word not in stop_words and len(word) < 13:
+				res.append(word)
 
 		elif w[1][0] == 'J':
 			word = lemmatizer.lemmatize(w[0], 'a')  # 词形归并
-			res.append((word, w[1]))
+			if word not in stop_words and len(word) < 13:
+				res.append(word)
+
+			# res.append((word, w[1]))
 
 		elif w[1][0] == 'V':
 			word = lemmatizer.lemmatize(w[0], 'v')  # 词形归并
-			res.append((word, w[1]))
+			if word not in stop_words and len(word) < 13:
+				res.append(word)
 
 	return res
 
 '''
-获得特定属性单词的共现窗口
+计算共现窗口
 '''
-def get_word_cooccurrence(pos):
+def get_word_cooccurrence(word_list):
 	co_window = {}
-	word_list = []
 	co_window_width = 6
 
-	for w in pos:
-		if w[1][0] == 'N' or w[1][0] == 'J' or w[1][0] == 'V':
-			word_list.append(w[0])
+	for w in word_list:
+		co_window[w] = None
 
-	word_set = set(word_list)
+	length = len(word_list)
+	for index in range(length):
+		w = word_list[index]
+		related_set = None
+		if not co_window[w]:
+			related_set = set()
+			co_window[w] = related_set
+		else:
+			related_set = co_window[w]
 
-	for w in word_set:
-		related_set = set()
-		length = len(word_list)
-		index_arr = find_all_index(word_list, w)
+		lower_bound = (index - co_window_width) > 0 and index - co_window_width or 0
+		upper_bound = (index + co_window_width) < length and index + co_window_width or length - 1  # 包含upper_bound
 
-		for index in index_arr:
-			lower_bound = (index - co_window_width) > 0 and index - co_window_width or 0
-			upper_bound = (index + co_window_width) < length and index + co_window_width or length - 1  # 包含upper_bound
-			i = lower_bound
+		i = lower_bound
+		while i <= upper_bound:
+			related_set.add(word_list[i])
+			i += 1
 
-			while i <= upper_bound:
-				related_set.add(word_list[i])
-				i += 1
-
-		related_set.remove(w)
-		co_window[w] = related_set
+	for w in co_window:
+		co_window[w].remove(w)
 
 	return co_window
 
-
-def find_all_index(arr, item):
-	return  [i for i,a in enumerate(arr) if a == item]
-
-
+'''
+计算得分最高的单词作为关键词
+'''
 def get_topk_word(co_window, k = -1):
-	max_iter = 10000000
+	max_iter = 1000000
 	pre_item_score = {}
 
 	for w in co_window:
-		pre_item_score[w] = len(co_window[w])
+		pre_item_score[w] = 1
 
 	i = 0
 	d = 0.85
@@ -116,7 +129,7 @@ def get_topk_word(co_window, k = -1):
 				
 			item_score[w] = d * sum + (1 - d)
 		
-		if calc_differ(pre_item_score, item_score) < 0.0001:
+		if calc_differ(pre_item_score, item_score) < 0.1:
 			break
 
 		pre_item_score =  item_score
@@ -128,7 +141,9 @@ def get_topk_word(co_window, k = -1):
 
 	return res[0 : k]
 
-
+'''
+计算两次迭代的得分差，判断终止条件
+'''
 def calc_differ(score1, score2):
 	res = 0
 	for item in score1:
@@ -136,13 +151,15 @@ def calc_differ(score1, score2):
 
 	return res
 
-
+'''
+获得用户信息
+'''
 def get_user_info():
 	db = MySQLdb.connect('127.0.0.1', 'root', '283319', 'twitter')
 	db.set_character_set('utf8')
 	cursor = db.cursor()
 
-	sql = "select user_id from user_famous"
+	sql = "select user_id from user_famous limit 4000"
 
 	try:
 		cursor.execute(sql)
@@ -153,32 +170,51 @@ def get_user_info():
 
 	return user_list
 
-
-def exe_process(text, k):
+'''
+执行
+'''
+def exe_process(text, k = -1):
 	pos = preprocess(text)
 	coo = get_word_cooccurrence(pos)
 	res = get_topk_word(coo, k)
 
+	return res
+
+
 def main():
-	pos = preprocess(text)
-	coo = get_word_cooccurrence(pos)
-	res = get_topk_word(coo)
-	print res
-	# user_list = get_user_info()
+	read_stop_words()
+	data = get_user_info()
+	
+	client = MongoClient('127.0.0.1', 27017)
+	db = client['twitter']
+	collect = db['tweets']
 
-	# client = MongoClient('127.0.0.1', 27017)
-	# db = client['twitter']
-	# collect = db['tweets']
+	db = MySQLdb.connect('127.0.0.1', 'root', '283319', 'twitter')
+	db.set_character_set('utf8')
+	cursor = db.cursor()
 
-	# for user_id in user_list:
-	# 	text = ""
-	# 	tweets = collect.find({'user_id': long(user_id)}, {text: 1})
-	# 	for tt in tweets:
-	# 		text += tt['text']
+	for user_id in data:
+		text = ""
+		tweets = collect.find({'user_id': long(user_id)}, {"text": 1})
 
-	# 	exe_process(text)
+		for tt in tweets:
+			text += tt['text']
 
+		topk = exe_process(text, 30)
+		text = ""
+		for w in topk:
+			text += w[0] + " "
+
+		sql = "insert into user_interest(user_id, user_interest) values('%s', '%s')" % (user_id, text)
+		try:
+			cursor.execute(sql)
+			db.commit()
+		except Exception as e:
+			print e
 
 
 if __name__ == '__main__':
+	start = time.clock()
 	main()
+	end = time.clock()
+	print end - start
