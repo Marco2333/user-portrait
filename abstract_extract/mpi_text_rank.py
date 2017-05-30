@@ -79,19 +79,25 @@ def preprocess(text):
 	return [res, _text]
 
 '''
-计算所有句子的相似度
+计算所有句子的相似度和共现窗口
 '''
-def calculate_similarity(tweet_list):
-	similarity = [[0] * len(tweet_list)] * len(tweet_list)
+def calculate_similarity_cowindow(tweet_list):
+	t1 = time.clock()
 	length = len(tweet_list)
+	similarity = [[0 for _ in range(length)] for _ in range(length)]
+	co_window = [[] for _ in range(length)]
 
 	for i in range(length):
 		for j in range(i + 1, length):
+			res = 0
 			res = calc_similarity_sentence(tweet_list[i], tweet_list[j])
-			similarity[i][j] = res
-			similarity[j][i] = res
+			if res >= 0.2:
+				co_window[i].append(j)
+				co_window[j].append(i)
+				similarity[i][j] = res
+				similarity[j][i] = res
 
-	return similarity
+	return [similarity, co_window]
 
 '''
 计算两个句子的相似度
@@ -120,7 +126,7 @@ def get_tweet_cooccurrence(tweet_list):
 '''
 def get_topk_sentence(similarity, co_window, count = -1):
 	max_iter = 1000000
-	pre_item_score = [1] * len(co_window)
+	pre_item_score = [1] * len(similarity)
 
 	i = 0
 	d = 0.85
@@ -132,24 +138,17 @@ def get_topk_sentence(similarity, co_window, count = -1):
 
 		for index in range(length):
 			sum = 0
-			for j in range(co_window[index][0], co_window[index][1] + 1):
-				if j == index:
-					continue
-
+			for j in co_window[index]:
 				denominator = 0
-				for k in range(co_window[j][0], co_window[j][1] + 1):
-					if k != j:
-						denominator += similarity[k][j]
+				for k in co_window[j]:
+					denominator += similarity[k][j]
 
-				if similarity[index][j] != 0:
-					sum += (similarity[index][j] * 1.0 / denominator) * pre_item_score[j]
+				sum += (similarity[index][j] * 1.0 / denominator) * pre_item_score[j]
 			
-			try:
-				item_score[index] = d * sum + (1 - d)
-			except Exception as e:
-				print e
-		
+			item_score[index] = d * sum + (1 - d)
+			
 		if calc_differ(pre_item_score, item_score) < 0.1:
+			# print i
 			break
 
 		pre_item_score = item_score
@@ -181,7 +180,7 @@ def get_user_info():
 	db.set_character_set('utf8')
 	cursor = db.cursor()
 
-	sql = "select user_id from user_famous limit 4000"
+	sql = "select user_id from user_interest1 limit 1000"
 
 	try:
 		cursor.execute(sql)
@@ -205,9 +204,11 @@ def exe_process(tweet_list, k = -1):
 			tweets_tp1.append(out[0])
 			tweets_tp2.append(out[1])
 
-	coo = get_tweet_cooccurrence(tweets_tp1)
-	similarity = calculate_similarity(tweets_tp1)
-	out = get_topk_sentence(similarity, coo, k)
+	res = calculate_similarity_cowindow(tweets_tp1)
+	similarity = res[0]
+	co_window = res[1]
+
+	out = get_topk_sentence(similarity, co_window, k)
 
 	res = []
 	for item in out:
@@ -267,8 +268,8 @@ def main():
 		for sentence in abstract:
 			abs_res += sentence + "\n"
 
-		sql = '''update user_interest set abstract = '%s' where user_id = '%s' ''' % (abs_res.replace("'","\\'").replace('"','\\"'), user_id)
-
+		sql = '''update user_interest1 set abstract = '%s' where user_id = '%s' ''' % (abs_res.replace("'","\\'").replace('"','\\"'), user_id)
+		sql = sql.encode("utf-8").decode("latin1")
 		try:
 			cursor.execute(sql)
 			db.commit()
