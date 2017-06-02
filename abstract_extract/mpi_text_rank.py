@@ -97,6 +97,13 @@ def calculate_similarity_cowindow(tweet_list):
 				similarity[i][j] = res
 				similarity[j][i] = res
 
+
+	# for i in range(length):
+	# 	if len(co_window[i]) > 30:
+			
+
+
+			
 	return [similarity, co_window]
 
 '''
@@ -138,9 +145,9 @@ def get_topk_sentence(similarity, co_window, count = -1):
 
 		for index in range(length):
 			sum = 0
-			for j in co_window[index]:
+			for j in co_window[index][0 : 30]:
 				denominator = 0
-				for k in co_window[j]:
+				for k in co_window[j][0 : 30]:
 					denominator += similarity[k][j]
 
 				sum += (similarity[index][j] * 1.0 / denominator) * pre_item_score[j]
@@ -180,7 +187,7 @@ def get_user_info():
 	db.set_character_set('utf8')
 	cursor = db.cursor()
 
-	sql = "select user_id from user_interest1 limit 1000"
+	sql = "select user_id from user_interest limit 1000"
 
 	try:
 		cursor.execute(sql)
@@ -241,7 +248,7 @@ def data_distribution():
 		data = comm.recv(source = 0)
 
 	return data
-
+ 
 
 def main():
 	read_stop_words()
@@ -268,7 +275,7 @@ def main():
 		for sentence in abstract:
 			abs_res += sentence + "\n"
 
-		sql = '''update user_interest1 set abstract = '%s' where user_id = '%s' ''' % (abs_res.replace("'","\\'").replace('"','\\"'), user_id)
+		sql = '''update user_interest set abstract = '%s' where user_id = '%s' ''' % (abs_res.replace("'","\\'").replace('"','\\"'), user_id)
 		sql = sql.encode("utf-8").decode("latin1")
 		try:
 			cursor.execute(sql)

@@ -105,21 +105,6 @@ def calculate_similarity_cowindow(tweet_list):
 def calc_similarity_sentence(s1, s2):
 	return len(s1 & s2) * 1.0 / (math.log(len(s1), 2) + math.log(len(s2), 2))
 
-'''
-计算共现窗口
-'''
-def get_tweet_cooccurrence1(tweet_list):
-	co_window = []
-	co_window_width = 10
-
-	length = len(tweet_list)
-	for index in range(length):
-		lower_bound = (index - co_window_width) > 0 and index - co_window_width or 0
-		upper_bound = (index + co_window_width) < length and index + co_window_width or length - 1  # 包含upper_bound
-
-		co_window.append([lower_bound, upper_bound]) 
-
-	return co_window
 
 def get_tweet_cooccurrence(similarity):
 	co_window = []
@@ -152,9 +137,9 @@ def get_topk_sentence(similarity, co_window, count = -1):
 
 		for index in range(length):
 			sum = 0
-			for j in co_window[index]:
+			for j in co_window[index][0 : 30]:
 				denominator = 0
-				for k in co_window[j]:
+				for k in co_window[j][0 : 30]:
 					denominator += similarity[k][j]
 
 				sum += (similarity[index][j] * 1.0 / denominator) * pre_item_score[j]
@@ -194,7 +179,7 @@ def get_user_info():
 	db.set_character_set('utf8')
 	cursor = db.cursor()
 
-	sql = "select user_id from user_famous limit 1000"
+	sql = "select user_id from user_interest limit 1000"
 
 	try:
 		cursor.execute(sql)
@@ -211,6 +196,8 @@ def get_user_info():
 def exe_process(tweet_list, k = -1):
 	tweets_tp1 = []
 	tweets_tp2 = []
+
+	time1 = time.clock()
 
 	for tweet in tweet_list:
 		out = preprocess(tweet)
