@@ -1,0 +1,28 @@
+'Good vibration' hand pumps boost Africa's water security
+The simple up-and-down motion of hand pumps could help scientists secure a key water source for 200 million people in Africa.
+Growing demand for groundwater is putting pressure on the resource while researchers struggle to accurately estimate the future supply. 
+But a team from Oxford University says that low-cost mobile sensors attached to pumps could solve the problem.
+While fresh water from Africa's rivers and lakes is hugely important for people, it is dwarfed by the amount of groundwater available, estimated to be 100 times greater than the annual renewable fresh resource. 
+Groundwater lies in aquifers under the surface of the earth and is often extracted from wells by pumps. In many places these are simple devices, operated by hand. 
+The idea was they would monitor the motion of the pump and the amount of water extracted on an hourly basis - if the pump wasn't working, a message was sent to a repair company and workers were dispatched to fix the problem. 
+The innovation cut the average repair time from over a month to less than three days.
+Now the scientists have found another way to interpret the data from the accelerometers fitted to the pump handles. 
+They discovered that when the water is being drawn from a deep aquifer, it produces different vibrations than when the liquid comes from a shallow one. 
+"It's quite a simple and elegant solution to estimating groundwater and how it varies over time," co-author Dr Rob Hope from Oxford's School of Geography and the Environment told BBC News.
+"In East Africa at the moment there's quite a severe drought, in South Sudan, Somalia, Ethiopia and Kenya, and a lot of this might be dealt with earlier with these sorts of systems. 
+"If you can predict that groundwater levels are going down rapidly, rather than getting to problem and dealing, with it you can predict it much earlier on."
+While the accelerometers and mobile data technology in the system is a fairly simple arrangement, the statistical analysis of the information is quite sophisticated.  
+Researchers took recordings of pumping lasting between 20 seconds and three minutes at different sites in Kenya and Oxford. 
+The scientists say the vibration value analysis is akin to the complex systems that monitor vibrations in aircraft.  
+"This project is a great example of using the latest developments in low-cost mobile sensors and machine learning," said lead author Dr David Clifton, associate professor of engineering science at Oxford.
+"Working closely with development experts, we can help tackle water security, which is an issue of huge importance in the developing world."
+There are now about 300 sensors installed across Kenya as an early warning system and some 15,000 people who are paying small premiums for rapid repairs. There has been very little damage or attempts to steal the technology in the communities in which they are installed, as people value the service. 
+The researchers believe the system can be rapidly scaled up and rolled out to other communities. With up to a million hand pumps dotted around Africa, they believe there is now a great opportunity to capture highly useful groundwater data. 
+When water falls as rain or snow, much of it either flows into rivers or is used to provide moisture to plants and crops. What is left over trickles down to the layers of rock that sit beneath the soil.  
+And just like a giant sponge, this groundwater is held in the spaces between the rocks and in the tiny interconnected spaces between individual grains in a rock like sandstone. 
+These bodies of wet rock are referred to as aquifers. Groundwater does not sit still in the aquifer but is pushed and pulled by gravity and the weight of water above it. 
+The movement of the water through the aquifer removes many impurities and it is often cleaner than water on the surface. 
+This "accidental infrastructure" could allow a network of hand pumps across the region to transmit data to the cloud to create a public dataset that would be widely used.
+"Rather than just seeing these pumps as concrete and iron littered around Africa, these systems could be the little sentinels giving you this very valuable information," said Dr Hope,  
+"Mining companies, agriculture, institutional investors and communities could all benefit from this. 
+"I've been working in Africa for 15 years and I think it's one of the most exciting things that we've been working on and the results that we've had have been very promising."

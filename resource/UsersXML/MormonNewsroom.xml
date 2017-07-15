@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<TwitterUser>
+ <基本信息>
+  <user_id>10047382</user_id>
+  <name coding="utf-8">Mormon Newsroom</name>
+  <screen_name>MormonNewsroom</screen_name>
+  <地理位置>Salt Lake City</地理位置>
+  <是否认证过>是</是否认证过>
+  <粉丝数>301852</粉丝数>
+  <朋友数>550</朋友数>
+  <点赞数>209</点赞数>
+  <推文数>3484</推文数>
+ </基本信息>
+ <隐性属性>
+  <用户领域>Religion</用户领域>
+  <近期心理状态>正面</近期心理状态>
+  <兴趣爱好>Conference,Christ,Newsroom,Mormon,Saints,Jesus,Mormons,Church,Temple,Leaders</兴趣爱好>
+  <影响力分数>95.5230958935</影响力分数>
+  <影响力等级>中等</影响力等级>
+ </隐性属性>
+</TwitterUser>
