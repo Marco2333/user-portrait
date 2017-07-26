@@ -34,6 +34,10 @@ def extension_thread():
 
 		while cursor != 0:
 			users_info = relation_crawler.get_friendids_paged_sleep(user_id = user_id, cursor = cursor)
+
+			if not users_info:
+				break
+
 			cursor = users_info[0]
 			friend_list = users_info[2]
 			
@@ -72,12 +76,18 @@ def portrayal_thread():
 
 
 def get_user_info(user_id):
-	user = basicinfo_crawler.get_user(user_id = user_id)
+	try:
+		user = basicinfo_crawler.get_user(user_id = user_id)
+	except Exception as e:
+		return False
 
 	if not judge_available(user):
 		return False
 
 	tweets = tweets_crawler.get_user_all_timeline_temp(user_id = user_id)
+	
+	if not tweets or len(tweets) < 400:
+		return False
 
 	user = {
 		'_id': user.id,
