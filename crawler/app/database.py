@@ -34,5 +34,3 @@ class MongoDB:
 
 		return db
 
-	# def close(self):
-

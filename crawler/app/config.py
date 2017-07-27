@@ -6,8 +6,8 @@ USER_AGENT = '''Mozilla/5.0 (Windows NT 6.3; WOW64)
 ############################## Database Config #####################################
 MYSQL = {
 	'DB_USER': 'root',
-	'DB_PASSWD': 'aliyunmysql@',
-	# 'DB_PASSWD': '283319',
+	# 'DB_PASSWD': 'aliyunmysql@',
+	'DB_PASSWD': '283319',
 	'DB_HOST': '127.0.0.1',
 	'DB_DATABASE': 'twitter',
 	'DB_CHARSET': 'utf8mb4'

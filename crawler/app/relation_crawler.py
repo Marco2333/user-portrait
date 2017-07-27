@@ -5,13 +5,15 @@ import threading
 from config import THREAD_NUM
 from twitter import error
 from api import Api, API_COUNT
-
+from decorator import generate_decorator
 
 class RelationCrawler:
 	get_api = Api().get_api
+	handle_exception = generate_decorator(800)
 	
+
 	'''
-	获取用户的关系信息
+	获取用户关系信息
 	'''
 	def show_friendship(self,
 						source_user_id, 
@@ -30,50 +32,25 @@ class RelationCrawler:
 											 target_user_id, 
 											 target_screen_name)
 
+
 	'''
-	保存用户关系的信息
+	获取用户关系信息，如果超时则会休眠800s，然后返回关系信息
 	'''
-	def save_friendship(self,
-						source_user_id = None, 
-						source_screen_name = None, 
-						target_user_id = None, 
-						target_screen_name = None):
+	def show_friendship_sleep(self,
+							  source_user_id = None, 
+							  source_screen_name = None, 
+							  target_user_id = None, 
+							  target_screen_name = None):
 
-		if not source_user_id and not source_screen_name:
-			return None
-
-		if not target_user_id and not target_screen_name:
-			return None
-
-		sleep_count = 0
-
-		while True:
-			try:
-				relation = self.get_api().ShowFriendship(source_user_id, 
-												 		source_screen_name, 
-												 		target_user_id, 
-												 		target_screen_name)
-			except error.TwitterError as te:
-				print te
-				if te.message[0]['code'] == 88:
-					sleep_count += 1
-
-					if sleep_count == API_COUNT:
-						print "sleeping..."
-						sleep_count = 0
-						time.sleep(700)
-					continue
-				else:
-					print te
-					return None
-
-			except Exception as e:
-				print e
-				return None
-
-			return relation
+		wrapper_func = self.handle_exception(self.show_friendship)
+		relation = wrapper_func(source_user_id, source_screen_name, target_user_id, target_screen_name)
+		
+		return relation
 
 
+	'''
+	获取用户朋友id
+	'''
 	def get_friendids(self,
                       user_id = None,
                       screen_name = None,
@@ -89,6 +66,9 @@ class RelationCrawler:
 					                       total_count = total_count)
 
 
+	'''
+	分页获取用户朋友id
+	'''
 	def get_friendids_paged(self,
 	                        user_id = None,
 	                        screen_name = None,
@@ -106,6 +86,9 @@ class RelationCrawler:
 						                        stringify_ids = stringify_ids)
 
 
+	'''
+	分页获取用户朋友id，如果超时则会休眠800s，然后返回朋友信息
+	'''
 	def get_friendids_paged_sleep(self,
 	                        	  user_id = None,
 		                          screen_name = None,
@@ -113,37 +96,19 @@ class RelationCrawler:
 		                          stringify_ids = False,
 		                          count = 5000):
 
-		if user_id == None and screen_name == None:
-			return None
+		wrapper_func = self.handle_exception(self.get_friendids_paged)
+		friendids = wrapper_func(user_id = user_id,
+								screen_name = screen_name,
+								cursor = cursor,
+								stringify_ids = stringify_ids,
+								count = count)
 
-		sleep_count = 0
-		res = None
+		return friendids
+	
 
-		while True:
-			try:
-				res = self.get_api().GetFriendIDsPaged(user_id = user_id,
-								                       screen_name = screen_name,
-								                       cursor = cursor,
-								                       count = count,
-								                       stringify_ids = stringify_ids)
-			except error.TwitterError as te:
-				if hasattr(te.message, 'code') and te.message['code'] == 88:
-					sleep_count += 1
-					if sleep_count == ApiCount:
-						print "sleeping..."
-						sleep_count = 0
-						time.sleep(600)
-					continue
-				else:
-					break
-			except Exception as e:
-				print e
-				break
-
-			break
-
-		return res
-
+	'''
+	获取用户朋友基础信息
+	'''
 	def get_friends(self,
                     user_id = None,
                     screen_name = None,
@@ -162,7 +127,9 @@ class RelationCrawler:
 				                  	     skip_status = skip_status,
 				                  	     include_user_entities = include_user_entities)
 		
-
+	'''
+	分页获取用户朋友基础信息
+	'''
 	def get_friends_paged(self,
                    		  user_id = None,
                           screen_name = None,
@@ -181,39 +148,29 @@ class RelationCrawler:
 					                       	  skip_status = skip_status,
 					                       	  include_user_entities = include_user_entities)
 
-
+	'''
+	获取用户所有朋友的id，并保存
+	'''
 	def get_all_friendids(self, 
 						  user_id = None, 
 						  screen_name = None):
 
-		if user_id == None and screen_name == None:
-			return None
-
 		cursor = -1
-		sleep_count = 0
-
-		api = self.api
-
 		while cursor != 0:
-			try:
-				out = get_api().GetFriendIDsPaged(user_id = user_id, cursor = cursor, count = 5000)
-				cursor = out[0]
-				friend_list = out[2]
-			except error.TwitterError as te:
-				if te.message[0]['code'] == 88:
-					sleep_count += 1
-					if sleep_count == API_COUNT:
-						print "sleeping..."
-						sleep_count = 0
-						time.sleep(700)
-					continue
-				else:
-					continue
+			out = self.get_friendids_paged_sleep(user_id = user_id,
+												 screen_name = screen_name, 
+												 cursor = cursor, 
+												 count = 5000)
+			if not out:
+				return None
 
-			except Exception as e:
-				continue
+			cursor = out[0]
+			friend_list = out[2]
+		
 
-
+	'''
+	获取用户粉丝id
+	'''
 	def get_followerids(self,
 	                    user_id = None,
 	                    screen_name = None,
@@ -224,11 +181,14 @@ class RelationCrawler:
 			return None
 
 		return self.get_api().GetFollowerIDs(user_id = user_id,
-					                     screen_name = screen_name,
-					              	     cursor = cursor,
-					               	     total_count = total_count)
+											 screen_name = screen_name,
+											 cursor = cursor,
+											 total_count = total_count)
 
 
+	'''
+	分页获取用户粉丝id
+	'''
 	def get_followerids_paged(self,
 		                      user_id = None,
 		                      screen_name = None,
@@ -246,6 +206,29 @@ class RelationCrawler:
 							                 	  stringify_ids = stringify_ids)
 
 
+	'''
+	分页获取用户粉丝id，如果超时则会休眠800s，然后返回粉丝信息
+	'''
+	def get_followerids_paged_sleep(self,
+	                        	    user_id = None,
+		                            screen_name = None,
+		                            cursor = -1,
+		                            stringify_ids = False,
+		                            count = 5000):
+
+		wrapper_func = self.handle_exception(self.get_followerids_paged)
+		followerids = wrapper_func(user_id = user_id,
+								   screen_name = screen_name,
+								   cursor = cursor,
+								   stringify_ids = stringify_ids,
+								   count = count)
+
+		return followerids
+
+
+	'''
+	获取用户粉丝基础信息
+	'''
 	def get_followers(self,
 	                  user_id = None,
 	                  screen_name = None,
@@ -265,6 +248,9 @@ class RelationCrawler:
 					                       include_user_entities = include_user_entities)
 
 
+	'''
+	分页获取用户粉丝基础信息
+	'''
 	def get_followers_paged(self,
 	                   		user_id = None,
 	                        screen_name = None,
@@ -284,31 +270,21 @@ class RelationCrawler:
 						                        include_user_entities = include_user_entities)
 
 
-	def get_all_followersids(self, user_id = None, screen_name = None):
-
-		if user_id == None and screen_name == None:
-			return None
+	'''
+	获取用户所有粉丝的id，并保存
+	'''
+	def get_all_followersids(self, 
+							 user_id = None, 
+							 screen_name = None):
 
 		cursor = -1
-		sleep_count = 0
-
-		api = self.api
-
 		while cursor != 0:
-			try:
-				out = get_api().GetFollowersIDsPaged(user_id = user_id, cursor = cursor, count = 5000)
-				cursor = out[0]
-				friend_list = out[2]
+			out = self.get_followerids_paged_sleep(user_id = user_id,
+												   screen_name = screen_name, 
+												   cursor = cursor, 
+												   count = 5000)
+			if not out:
+				return None
 
-			except error.TwitterError as te:
-				if te.message[0]['code'] == 88:
-					sleep_count += 1
-					if sleep_count == ApiCount:
-						print "sleeping..."
-						sleep_count = 0
-						time.sleep(700)
-					continue
-				else:
-					continue
-			except Exception as e:
-				continue
+			cursor = out[0]
+			follower_list = out[2]
