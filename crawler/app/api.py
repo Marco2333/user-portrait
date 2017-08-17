@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 from twitter import Api
 from config import APP_INFO
 
@@ -14,6 +15,9 @@ class Api:
 	def __init__(self):
 		self.api_index = 0
 
+	'''
+	获取 twitter app，每次调用返回一个新的 app
+	'''
 	def get_api(self):
 		api_index = self.api_index
 		api_index = (api_index + 1) % API_COUNT

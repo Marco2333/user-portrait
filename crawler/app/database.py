@@ -1,11 +1,13 @@
+# -*- coding:utf-8 -*-
+
 import MySQLdb
 
-from config import MYSQL
+from config import MYSQL, MONGO_DB
 from pymongo import MongoClient
 
 class Mysql:
 	def connect(self):
-		db = MySQLdb.connect(MYSQL['DB_HOST'], MYSQL['DB_USER'], MYSQL['DB_PASSWD'], MYSQL['DB_DATABASE'])
+		db = MySQLdb.connect(MYSQL['DB_HOST'], MYSQL['DB_USER'], MYSQL['DB_PASSWORD'], MYSQL['DB_DATABASE'])
 		cursor = db.cursor()
 		self.cursor = cursor
 		self.db = db
@@ -28,9 +30,8 @@ class Mysql:
 
 class MongoDB:
 	def connect(self, db_name = 'twitter'):
-		client = MongoClient('127.0.0.1', 27017)
+		client = MongoClient(MONGO_DB['DB_HOST'], MONGO_DB['DB_PORT'])
 		db = client[db_name]
 		self.db = db
 
 		return db
-

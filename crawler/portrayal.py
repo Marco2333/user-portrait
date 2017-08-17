@@ -98,7 +98,7 @@ def get_user_info(user_id):
 	if not judge_available(user):
 		return False
 
-	tweets = tweets_crawler.get_user_all_timeline_temp(user_id = user_id)
+	tweets = tweets_crawler.get_user_all_timeline_return(user_id = user_id)
 	
 	if not tweets or len(tweets) < 400:
 		return False

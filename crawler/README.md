@@ -1,8 +1,23 @@
 # twitter-crawler twitter爬虫
 
-## 用户基础信息
+## Core Code
+- ./app/basicinfo_crawler: 抓取用户基础信息
+- ./app/relation_crawler: 抓取用户关系信息
+- ./app/tweets_crawler: 抓取用户推文信息
+
+./crawler.py 、portrayal.py、 ./relation.py （测试使用）
+
+## twitter 开发者API官方文档地址
+[https://dev.twitter.com/overview/api](https://dev.twitter.com/overview/api)
+
+## python-twitter官方教程
+[https://python-twitter.readthedocs.io/en/latest/twitter.html](https://python-twitter.readthedocs.io/en/latest/twitter.html)
+
+## 数据库字段含义
+
+### 用户基础信息
 - id: unique identifier for this User (用户ID)
-- screenname: String | The screen name, handle, or alias that this user identifies themselves with. screen_names are unique but subject to change(账号名称（唯一）)
+- screen_name: String | The screen name, handle, or alias that this user identifies themselves with. screen_names are unique but subject to change(账号名称（唯一）)
 - name: String | The name of the user, as they’ve defined it.(用户名称)
 - created_at: String | The UTC datetime that the user account was created on Twitter.(加入日期)("Mon Nov 29 21:18:15 +0000 2010")
 - description: String(Nullable) | The user-defined string describing their account (个人简介)
@@ -23,9 +38,9 @@
 - profile_text_color: String | The hexadecimal color the user has chosen to display text with in their Twitter UI
 - profile_sidebar_fill_color: String | The hexadecimal color the user has chosen to display sidebar backgrounds with in their Twitter UI
 - is_translator: tinyint(0 or 1 => Boolean) | When 1, indicates that the user is a participant in Twitter’s translator community
-profile_image_url: String | A HTTPS-based URL pointing to the user’s avatar image(头像)
+- profile_image_url: String | A HTTPS-based URL pointing to the user’s avatar image(头像)
 
-## 推文信息
+### 推文信息
 - coordinates：Nullable Represents the geographic location of this Tweet as reported by the user or client application. The inner coordinates array is formatted as geoJSON (longitude first, then latitude).  
 ```python 
 "coordinates":
@@ -82,6 +97,3 @@ profile_image_url: String | A HTTPS-based URL pointing to the user’s avatar im
 - retweet_count：Number of times this Tweet has been retweeted. 
 - source：Utility used to post the Tweet, as an HTML-formatted string. Tweets from the Twitter website have a source value of web.
 - text: The actual UTF-8 text of the status update.
-
-## 官方文档地址
-[https://dev.twitter.com/overview/api](https://dev.twitter.com/overview/api)

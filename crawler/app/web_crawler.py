@@ -1,4 +1,4 @@
-#coding=utf-8
+# -*- coding:utf-8 -*-
 import urllib
 import urllib2
 import MySQLdb
@@ -11,6 +11,9 @@ import socket
 from bs4 import BeautifulSoup
 from pybloom import BloomFilter
 
+'''
+采用 web 方式抓取 Twitter 的类（已经弃用）
+'''
 class Crawler:
 	def __init__(self):	
 
@@ -79,21 +82,17 @@ class Crawler:
 		# return
 
 		self.urlList = [config.INITIAL_USER]
-		# self.months = dict(January = 1, February = 2, March = 3, \
-		# 		April = 4, May = 5, June = 6, July = 7, August = 8, \
-		# 		September = 9, October = 10, November = 11, December = 12)
 		self.months = dict(Jan = '1', Feb = '2', Mar = '3', Apr = '4', \
 						May = '5', Jun = '6', Jul = '7', Aug = '8', \
 						Sep = '9', Oct = '10', Nov = '11', Dec = '12')
 
-		db = MySQLdb.connect(config.DB_HOST, config.DB_USER, config.DB_PASSWD, config.DB_DATABASE)
+		db = MySQLdb.connect(config.DB_HOST, config.DB_USER, config.DB_PASSWORD, config.DB_DATABASE)
 		# 使用cursor()方法获取操作游标 
 		cursor = db.cursor()
 		self.cursor = cursor
 		self.db = db
 		self.bf = BloomFilter(capacity=1000000, error_rate=0.001)
 		self.bf.add(config.INITIAL_USER)
-		# self.getUsersInfo()
 		self.restart()
 
 	def getUsersInfo(self):
@@ -154,8 +153,6 @@ class Crawler:
 			joindate = joindate[0 : -1]
 		except:
 			joindate = ""
-
-		# joindate = jdlist[5] + "-" + self.months[jdlist[4]] + "-" + jdlist[3]
 
 		try:
 			tn = soup.select_one(".ProfileNav-item--tweets") \
