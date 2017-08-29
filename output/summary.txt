@@ -1,0 +1,9 @@
+Politics: 207
+Religion: 110
+Military: 180
+Economy: 70
+Technology: 49
+Education: 64
+Agriculture: 14
+Entertainment: 162
+Sports: 172
