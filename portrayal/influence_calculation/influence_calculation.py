@@ -11,6 +11,10 @@ import time
 import datetime
 from pymongo import MongoClient
 
+
+'''
+计算两个时间相差的天数
+'''
 def calc_time_differ(t1, t2):
 	t1 = time.strptime(t1, "%Y-%m-%d %H:%M:%S")
 	t2 = time.strptime(t2, "%Y-%m-%d %H:%M:%S")
@@ -19,6 +23,12 @@ def calc_time_differ(t1, t2):
 
 	return abs((t2 - t1).days)
 
+
+'''
+将推文分割为按月为单位的推文列表
+返回：
+	二维推文列表
+'''
 def split_tweets_by_month(tweets = [], period = 1):
 	threshold = period * 30
 	
@@ -47,6 +57,10 @@ def split_tweets_by_month(tweets = [], period = 1):
 
 	return tweets_list
 
+
+'''
+参数计算
+'''
 def calc_parameters(tweets):
 	origin_count = rt_count = 0  # 原创推文和转发推文
 	origin_retweet_count = origin_retweet_average = origin_retweet_max = 0  # 原创推文转发 总数、平均值、最大值
@@ -84,23 +98,25 @@ def calc_parameters(tweets):
 	return tweet_start_time, tweet_end_time, origin_count, rt_count, origin_retweet_count, \
 	origin_retweet_average, origin_retweet_max, origin_favorite_count, origin_favorite_average, origin_favorite_max
 
+
+'''
+参数计算：只返回原创推文数和转发推文数
+'''
 def calc_parameters_4sequence(tweets):
 	origin_count = rt_count = 0  # 原创推文和转发推文
 
 	if len(tweets) == 0:
 		return
 
-	tweet_start_time = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(tweets[0]['created_at'].replace('+0000 ','')))
-	tweet_end_time = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(tweets[-1]['created_at'].replace('+0000 ','')))
-
 	for tweet in tweets:
-		if re.match(r"^RT @[\w|\d|_]+", tweet["text"]) != None:
+		if re.match(r"^RT @\w+", tweet["text"]) != None:
 			rt_count += 1
 		   
 		else:
 			origin_count += 1
 
-	return tweet_start_time, tweet_end_time, origin_count, rt_count
+	return origin_count, rt_count
+
 
 '''
 计算活跃度
@@ -112,20 +128,28 @@ def calc_activity(origin_count, rt_count, time_span):
 
 	return total
 
+
+'''
+活跃度序列计算
+参数：
+	period：时间跨度，默认为 1，表示每一个月计算一次活跃度
+'''
 def calc_activity_sequence(tweets, period = 1):
 	tweets_list = split_tweets_by_month(tweets, 1)
 
 	res = []
 	for tts in tweets_list:
-		print len(tts)
-		tweet_start_time, tweet_end_time, origin_count, rt_count = calc_parameters_4sequence(tts)
-		time_span = calc_time_differ(tweet_start_time, tweet_end_time)
+		origin_count, rt_count = calc_parameters_4sequence(tts)
 
-		activity = calc_activity(origin_count, rt_count, time_span)
+		activity = calc_activity(origin_count, rt_count, period * 30)
 		res.append(activity)
 
 	return res if len(res) < 5 else res[0 : -1]
 
+
+'''
+计算推文影响力
+'''
 def calc_tweet_influence(origin_retweet_count, origin_retweet_average, origin_retweet_max, \
 							  origin_favorite_count, origin_favorite_average, origin_favorite_max):
 	retweet_rate = 0.45 * math.log(origin_retweet_count + 1) + 0.35 * math.log(origin_retweet_average + 1) + 0.2 * math.log(origin_retweet_max + 1)
@@ -133,9 +157,17 @@ def calc_tweet_influence(origin_retweet_count, origin_retweet_average, origin_re
 
 	return 0.6 * retweet_rate + 0.4 * favorite_rate
 
+
+'''
+计算粉丝影响力
+'''
 def calc_follower_influence(followers_count):
 	return math.log(followers_count + 1)
 
+
+'''
+影响力计算
+'''
 def calculate_influence(followers_count, tweets):
 	tweet_start_time, tweet_end_time, origin_count, rt_count, origin_retweet_count, origin_retweet_average, \
 	origin_retweet_max, origin_favorite_count, origin_favorite_average, origin_favorite_max = calc_parameters(tweets)
