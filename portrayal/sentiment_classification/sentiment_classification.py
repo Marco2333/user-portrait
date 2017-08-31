@@ -7,6 +7,8 @@
 '''
 import re
 import nltk
+import time
+import datetime
 import MySQLdb
 
 from pymongo import MongoClient
@@ -15,6 +17,52 @@ from nltk.stem import WordNetLemmatizer
 from pymongo import MongoClient
 
 stop_words = set()
+
+'''
+计算两个时间相差的天数
+'''
+def calc_time_differ(t1, t2):
+	t1 = time.strptime(t1, "%Y-%m-%d %H:%M:%S")
+	t2 = time.strptime(t2, "%Y-%m-%d %H:%M:%S")
+	t1 = datetime.datetime(t1[0], t1[1], t1[2], t1[3], t1[4], t1[5])
+	t2 = datetime.datetime(t2[0], t2[1], t2[2], t2[3], t2[4], t2[5])
+
+	return abs((t2 - t1).days)
+
+
+'''
+将推文分割为按月为单位的推文列表
+返回：
+	二维推文列表
+'''
+def split_tweets_by_month(tweets = [], period = 1):
+	threshold = period * 30
+	
+	if len(tweets) == 0:
+		return
+
+	start_time = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(tweets[0]['created_at'].replace('+0000 ','')))
+	start_time_temp = start_time
+
+	tts = []
+	tweets_list = []
+
+	for tweet in tweets:
+		time_temp = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(tweet['created_at'].replace('+0000 ','')))
+		
+		if calc_time_differ(time_temp, start_time_temp) <= threshold:
+			tts.append(tweet)
+		else:
+			start_time_temp = time_temp
+			tweets_list.append(tts)
+			tts = []
+			tts.append(tweet)
+
+	if len(tts) != 0:
+		tweets_list.append(tts)
+
+	return tweets_list
+
 
 def read_stop_words():
 	f = open("f:\python\user-portrait\portrayal\sentiment_classification\stop_words.txt", "r")  
@@ -37,37 +85,64 @@ def preprocess(text):
 	word_list = []
 	words = word_tokenize(text)
 
-	for word in words:
-		if len(word) > 2 and word.isalpha() and word not in stop_words:
-			word_list.append(word)
-
 	try:
-		pos = nltk.pos_tag(word_list)
+		pos = nltk.pos_tag(words)
 	except Exception as e:
 		print e
 		pos = []
 
- 	res = set()
-	lemmatizer = WordNetLemmatizer()
+	for word in pos:
+		if word[0].isalpha() and word[0] not in stop_words:
+			word_list.append(word)
 
-	for w in pos:
-		if w[1][0] == 'N':
-			word = lemmatizer.lemmatize(w[0])  # 词形归并
-			if word not in stop_words:
-				res.add(word)
+ 	res = []
+	# lemmatizer = WordNetLemmatizer()
+	for word in word_list:
+		if word[1][0] == 'N':
+			# word = lemmatizer.lemmatize(word[0])  # 词形归并
+			res.append((word[0], 'n'))
 
-		elif w[1][0] == 'J':
-			word = lemmatizer.lemmatize(w[0], 'a')  # 词形归并
-			if word not in stop_words:
-				res.add(word)
+		elif word[1][0] == 'J':
+			# word = lemmatizer.lemmatize(word[0], 'a')  # 词形归并
+			res.append((word[0], 'a'))
 
-		elif w[1][0] == 'V':
-			word = lemmatizer.lemmatize(w[0], 'v')  # 词形归并
-			if word not in stop_words:
-				res.add(word)
+		elif word[1][0] == 'V':
+			# word = lemmatizer.lemmatize(word[0], 'v')  # 词形归并
+			res.append((word[0], 'v'))
 
-	if len(res) < 3:
-		return [None, None]
+		elif word[1][0] == 'R':
+			# word = lemmatizer.lemmatize(word[0], 'r')  # 词形归并
+			res.append((word[0], 'r'))
+
+	return res
+
+
+def calc_sentiment_sequence(tweets):
+	sentiment_dict = generate_sentiment_dict()
+	tweets_list = split_tweets_by_month(tweets, 1)
+
+	res = []
+	# t_s = 0
+	for tts in tweets_list:
+		text = ''
+		score = 0
+
+		for tweet in tts:
+			text += tweet['text'] + ' '
+		
+		word_list = preprocess(text)
+		for word in word_list:
+			key = word[0] + '#' + word[1]
+			if key in sentiment_dict:
+				score += sentiment_dict[key]
+		
+		# t_s += score
+				
+		res.append(score)
+
+	# print t_s
+
+	return res if len(res) < 5 else res[0 : -1]
 
 
 def generate_sentiment_dict():
@@ -117,21 +192,32 @@ def generate_sentiment_dict():
 		if score_sum / count != 0:
 			res[key] = score_sum / count
 	
+	count = 0
+	for item in res:
+		if abs(res[item]) > 0.4:
+			count += 1
+			print item
+
+	print count
 	return res
 
 
 
 
 if __name__ == '__main__':
-	client = MongoClient('127.0.0.1', 27017)
-	db = client['dump']
-	a = db['typical_temp'].find_one({'screen_name': 'BarackObama'}, {'tweets': 1})
+	# client = MongoClient('127.0.0.1', 27017)
+	# db = client['dump']
+	# a = db['typical_temp'].find_one({'screen_name': 'philstockworld'}, {'tweets': 1})
 
-	text = ''
-	for item in a['tweets'][1:3]:
-		text += item['text'] + ' '
+	# calc_sentiment_sequence(a['tweets'])
+
+	generate_sentiment_dict()
+	# text = ''
+	# for item in a['tweets']:
+	# 	print item['text']
+	# 	text += item['text'] + ' '
 
 	# generate_sentiment_dict()
-	preprocess(text)
+	# preprocess(text)
 	# read_stop_words()
 	# print stop_words
