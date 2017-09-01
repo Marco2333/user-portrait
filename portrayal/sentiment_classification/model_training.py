@@ -92,7 +92,9 @@ def training():
 
 	# 将所有词按照词频按降次排序
 	# all_words = nltk.FreqDist(all_words)
-
+	all_words = nltk.FreqDist(all_words)
+	# 选取前5000个词作为特征属性,按照词频作为特征提取的依据
+	word_features = all_words.keys()
 	# all_words_temp = {}
 	# for item in all_words:
 	# 	all_words_temp[item] = all_words[item]
@@ -104,7 +106,6 @@ def training():
 	# 选取前5000个词作为特征属性,按照词频作为特征提取的依据
 	# 将特征属性持久化
 	save_features = open(project_path + "/pickle/word_features5K.pickle","wb")
-	word_features = all_words
 	pickle.dump(word_features, save_features)
 
 	save_features.close()
@@ -112,9 +113,9 @@ def training():
 
 	featuresets = [(Word2Features(rev, word_features), category) for (rev,category) in documents]
 
-	# print featuresets
+	print featuresets
 
-	# return
+	return
 	# 打乱，为了抽取训练集和测试集
 	random.shuffle(featuresets)
 	print("共有数据集: ")
