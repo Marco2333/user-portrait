@@ -54,10 +54,12 @@ def Training(data_set_path="/DocumentClassify/dt"):
 
 	x_train_counts = count_vect.fit_transform(training_set.data)
 
+	# print count_vect
 	# print x_train_counts.data
 	# print x_train_counts.shape
 	# print x_train_counts.toarray()
-	# print count_vect.get_feature_names()
+	print count_vect.get_feature_names()
+	# print type(x_train_counts)
 	# return
 
 	count_vect_path = piclke_path + "count_vect.pickle"

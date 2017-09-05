@@ -1,5 +1,7 @@
 # -*- coding:utf-8 -*-
 
+PROJECT_PATH = "F:/python/user-portrait/app/"
+
 # MySQL配置
 MYSQL = {
 	'DB_USER': 'root',

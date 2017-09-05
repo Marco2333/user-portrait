@@ -23,7 +23,7 @@ def Classify(text,Classifier):
 		return "None"
 	txt = [text]
 	# print text
-	txt.append(text)
+	# txt.append(text)
 
 	# 如果模型持久化文件不存在则需要先训练
 	# if len(os.listdir(config.project_path + "/DocumentClassify/pickles/")) <= 6:
@@ -56,6 +56,7 @@ def Classify(text,Classifier):
 	open_file.close()
 	print clf._joint_log_likelihood(x_test_tf.toarray())
 	clf.predict(x_test_tf.toarray())[0]
+	print target_names
 	result = target_names[clf.predict(x_test_tf.toarray())[0]]
 	return result
 
