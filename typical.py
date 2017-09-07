@@ -6,7 +6,7 @@ from app.portrayal.career_classify import preprocess as training_preprocess
 
 def classify_career():
 	db = MongoDB().connect('dump')
-	users = db['typical_temp'].find({'category': 'Entertainment'})
+	users = db['typical_temp'].find({'category': 'Education'})
 
 	n = 0
 	for user in users:
@@ -17,9 +17,6 @@ def classify_career():
 		for tweet in tweets:
 			text += ' ' + tweet['text']
 		
-		print preprocess.preprocess(text)
-		# print text
-		return 
 		res = classify.classify(preprocess.preprocess(text))
 
 		print res
@@ -29,6 +26,6 @@ def classify_career():
 	print n
 
 if __name__ == "__main__":
-	# classify_career()
+	classify_career()
 	# training.training()
-	training_preprocess.delete_ambiguity()
+	# training_preprocess.delete_ambiguity()

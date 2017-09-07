@@ -24,7 +24,7 @@ CNN: agriculture/economy/education/entertainment/military/politics/religion/spor
 
 data: BCC新闻数据集 + 维基词条文章 + 部分CNN文本
 '''
-def training(dataset_path = module_path + "data", pickle_path = module_path + "pickle/"):
+def training(dataset_path = module_path + "data_pruned", pickle_path = module_path + "pickle/"):
 	print "读入训练数据..."
 	training_dataset = datasets.load_files(dataset_path)
 
