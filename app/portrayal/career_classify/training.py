@@ -6,6 +6,7 @@
  * @Last Modified time: 2017-09-05 14:07:32 
  */
 '''
+import os
 import pickle
 
 from sklearn import datasets
@@ -24,7 +25,7 @@ CNN: agriculture/economy/education/entertainment/military/politics/religion/spor
 
 data: BCC新闻数据集 + 维基词条文章 + 部分CNN文本
 '''
-def training(dataset_path = module_path + "data_pruned", pickle_path = module_path + "pickle/"):
+def training(dataset_path = module_path + "data_processed", pickle_path = module_path + "pickle/"):
 	print "读入训练数据..."
 	training_dataset = datasets.load_files(dataset_path)
 
@@ -66,3 +67,20 @@ def training(dataset_path = module_path + "data_pruned", pickle_path = module_pa
 	pickle.dump(multi_classifier, multi_classifier_file)
 	multi_classifier_file.close()
 	print "多项式分类器已保存"
+
+
+def training_special_category(category_list, dataset_path = module_path + "data_category/", pickle_path = module_path + "pickle_category/"):
+	category_list.sort()
+
+	dir_name = ''
+	for item in category_list:
+		dir_name += '_' + item
+
+	dir_name = dir_name[1 : ]
+
+	pickle_category_path = pickle_path + dir_name + "/"
+
+	if not os.path.exists(pickle_category_path):
+		os.makedirs(pickle_category_path) 
+	
+	training(dataset_path + dir_name, pickle_category_path)

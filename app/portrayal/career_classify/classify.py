@@ -11,14 +11,13 @@ import pickle
 from ... config import PROJECT_PATH
 
 module_path = PROJECT_PATH + "portrayal/career_classify/"
-pickle_path = module_path + "pickle/"
-
-categories_path = pickle_path + "categories.pickle"
-count_vector_path = pickle_path + "count_vector.pickle"
-tf_idf_transformer_path = pickle_path + "tf_idf_transformer.pickle"
 
 
-def classify(text = ''):
+def classify(text = '', pickle_path = module_path + "pickle/"):
+	categories_path = pickle_path + "categories.pickle"
+	count_vector_path = pickle_path + "count_vector.pickle"
+	tf_idf_transformer_path = pickle_path + "tf_idf_transformer.pickle"
+
 	if text == "":
 		return None
 	
@@ -58,4 +57,44 @@ def classify(text = ''):
 	for i in range(len(score_list)):
 		categories_score[target_names[i]] = round((score_list[i] - min_value) * 25, 2)
 
+	return category, categories_score
+
+
+def classify_special_category(category_list, text = '', pickle_path = module_path + "pickle_category/"):
+	category_list.sort()
+
+	dir_name = ''
+	for item in category_list:
+		dir_name += '_' + item
+
+	dir_name = dir_name[1 : ]
+
+	return classify(text, pickle_path + dir_name + '/')
+
+
+def exe_classify(text = None):
+	if not text:
+		return None
+	
+	related_category_dict = {
+		'Politics': ["Education"],
+		# 'Technology': ["Economy"]
+	}
+
+	category, categories_score = classify(text)
+	# print category, categories_score
+
+	if related_category_dict.has_key(category):
+		for related_category in related_category_dict[category]:
+			if (categories_score[category] < categories_score[related_category] * 2) and (categories_score[category] - categories_score[related_category]) < 36:
+				category_temp, categories_score_temp = classify_special_category([category, related_category], text)
+				
+				if category_temp != category_temp:
+					if categories_score_temp[category_temp] < categories_score_temp[category] * 1.2:
+						continue
+
+					categories_score[category_temp] = categories_score[category] + (categories_score_temp[category_temp] - categories_score_temp[category]) * 5
+					
+					return category_temp, categories_score
+	
 	return category, categories_score
