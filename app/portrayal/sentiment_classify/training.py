@@ -5,22 +5,30 @@
  * @Last Modified by: Marco 
  * @Last Modified time: 2017-09-07 20:18:27 
  '''
- 
+import os
 import nltk
 import pickle
 import random
 
-from ... tools.function import get_stop_words
-from ... tools.preprocess import preprocess, preprocess_postag
+from sklearn.svm import LinearSVC
+from nltk.tokenize import word_tokenize
+from nltk.classify.scikitlearn import SklearnClassifier
+from sklearn.naive_bayes import MultinomialNB, BernoulliNB
+from sklearn.linear_model import LogisticRegression, SGDClassifier
+
+from .. tools.function import get_stop_words
+from .. tools.preprocess import preprocess, preprocess_postag
 from ... config import PROJECT_PATH
 
 stop_words = get_stop_words()
 module_path = PROJECT_PATH + "portrayal/sentiment_classify/"
+pickle_path = module_path + "pickle/"
+
 
 # 对一段文档建立特征
 def word2features(document, word_features):
 	features = {}
-	words = preprocess(document)
+	words = word_tokenize(document, language='english')
 		
 	for w in word_features:
 		features[w] = w in words
@@ -28,10 +36,10 @@ def word2features(document, word_features):
 	return features
 
 
-def training():
+def save_feature_document():
 	# 加载语料库
-	pos_corpus = open(project_path + "module_path/positive.txt", "r").read()
-	neg_corpus = open(project_path + "module_path/negative.txt", "r").read()
+	pos_corpus = open(module_path + "data/positive.txt", "r").read()
+	neg_corpus = open(module_path + "data/negative.txt", "r").read()
 
 	documents = []
 	words_feature = []
@@ -39,13 +47,14 @@ def training():
 	# J是代表形容词，R代表副词，V代表动词
 	allowed_types = ['J']
 
+	n = 0
+	p_temp = ''
+
 	for p in pos_corpus.split("\n"):
 		word_tags = preprocess_postag(p)
 		
 		if not word_tags:
 			continue
-
-		p_temp = ''
 
 		# 形容词对情感影响较大，所以选取形容词为特征
 		for item in word_tags:
@@ -54,8 +63,16 @@ def training():
 			if item[1][0] in allowed_types:
 				words_feature.append(item[0])
 		
-		if p_temp != '':
+		n += 1
+		if n % 15 == 0:
 			documents.append((p_temp, "pos"))
+			p_temp = ''
+
+	if n > 7:
+		documents.append((p_temp, "pos"))
+	
+	n = 0
+	p_temp = ''
 
 	for p in neg_corpus.split("\n"):
 		word_tags = preprocess_postag(p)
@@ -63,104 +80,123 @@ def training():
 		if not word_tags:
 			continue
 
-		p_temp = ''
-
 		for item in word_tags:
 			p_temp += item[0] + " "
 
 			if item[1][0] in allowed_types:
 				words_feature.append(item[0])
 		
-		if p_temp != '':
+		n += 1
+		if n % 15 == 0:
 			documents.append((p_temp, "neg"))
+			p_temp = ''
+
+	if n > 7:
+		documents.append((p_temp, "neg"))
 
 	# 将处理好的文档持久化
-	save_documents = open(module_path + "pickle/documents.pickle","wb")
-	pickle.dump(documents, save_documents)
-	save_documents.close()
-	print("处理完成的文档已保存!")
+	documents_file = open(pickle_path + "documents.pickle","wb")
+	pickle.dump(documents, documents_file)
+	documents_file.close()
+	print "Documents saved!"
 
+	# 统计
 	words_feature = nltk.FreqDist(words_feature)
-	words_feature = words_feature.keys()
+	words_feature_temp = sorted(words_feature.iteritems(), key = lambda i: i[1], reverse = True)
+
+	words_feature = map(lambda tuple: tuple[0], words_feature_temp)
+	words_feature = words_feature[0 : 5000]
 
 	# 将特征属性持久化
-	feature_file = open(module_path + "pickle/words_feature.pickle", "wb")
+	feature_file = open(pickle_path + "words_feature.pickle", "wb")
 	pickle.dump(words_feature, feature_file)
 
 	feature_file.close()
-	print("特征属性已保存!")
+	print "words_feature saved!"
 
 	feature_sets = [(word2features(p, words_feature), category) for (p, category) in documents]
 
-	print feature_sets
+	# 将特征属性持久化
+	feature_file = open(pickle_path + "feature_sets.pickle", "wb")
+	pickle.dump(feature_sets, feature_file)
 
-	return
+	feature_file.close()
+	print "feature_sets saved!"
+
+
+def training():
+	if not os.path.exists(pickle_path + "feature_sets.pickle"):
+		save_feature_document()
+		
+	feature_file = open(pickle_path + "feature_sets.pickle")
+	feature_sets = pickle.load(feature_file)
+
 	# 打乱，为了抽取训练集和测试集
 	random.shuffle(feature_sets)
-	print("共有数据集: ")
+	print "Length of feature_sets: "
 	print len(feature_sets)
 
-	testing_set = feature_sets[10000:]
-	print("测试集:659条")
-	training_set = feature_sets[:10000]
-	print("训练集:10000条")
+	testing_set = feature_sets[150:]
+	print("testing: %d" % len(testing_set))
+	training_set = feature_sets
+	print("training: %d" % len(training_set))
 
 	# 分类器选择
 	# 朴素贝叶斯-nltk自带分类器
 	classifier = nltk.NaiveBayesClassifier.train(training_set)
-	print("朴素贝叶斯分类精度:")
-	print(nltk.classify.accuracy(classifier,testing_set))
+	print "NaiveBayesClassifier accuracy:"
+	print(nltk.classify.accuracy(classifier, testing_set))
 	# 分类器持久化
-	save_classifier = open("pickle_algos/naivebayes.pickle","wb")
-	pickle.dump(classifier,save_classifier)
-	save_classifier.close()
+	classifier_file = open(pickle_path + "naivebayes.pickle", "wb")
+	pickle.dump(classifier, classifier_file)
+	classifier_file.close()
 
 	# 多项式分类器-sklearn
-	MNB_classifier = SklearnClassifier(MultinomialNB())
-	MNB_classifier.train(training_set)
-	print("多项式分类器分类精度:")
-	print(nltk.classify.accuracy(MNB_classifier,testing_set))
+	mnb_classifier = SklearnClassifier(MultinomialNB())
+	mnb_classifier.train(training_set)
+	print "MultinomialNB accuracy:"
+	print(nltk.classify.accuracy(mnb_classifier, testing_set))
 	# 分类器持久化
-	save_classifier = open("pickle_algos/MNB_classifier.pickle","wb")
-	pickle.dump(classifier,save_classifier)
-	save_classifier.close()
+	classifier_file = open(pickle_path + "mnb_classifier.pickle", "wb")
+	pickle.dump(classifier, classifier_file)
+	classifier_file.close()
 
 	# 伯努利分类器-sklearn
-	BernoulliNB_classifier = SklearnClassifier(BernoulliNB())
-	BernoulliNB_classifier.train(training_set)
-	print("伯努利分类器分类精度：")
-	print(nltk.classify.accuracy(BernoulliNB_classifier,testing_set))
+	bnb_classifier = SklearnClassifier(BernoulliNB())
+	bnb_classifier.train(training_set)
+	print "BernoulliNB accuracy:"
+	print(nltk.classify.accuracy(bnb_classifier, testing_set))
 	# 分类器持久化
-	save_classifier = open("pickle_algos/BernoulliNB_classifier.pickle","wb")
-	pickle.dump(classifier,save_classifier)
-	save_classifier.close()
+	classifier_file = open(pickle_path + "bnb_classifier.pickle", "wb")
+	pickle.dump(classifier, classifier_file)
+	classifier_file.close()
 
 	# 逻辑回归分类-sklearn
-	LogisticRegression_classifier = SklearnClassifier(LogisticRegression())
-	LogisticRegression_classifier.train(training_set)
-	print("逻辑回归分类器分类精度:")
-	print(nltk.classify.accuracy(LogisticRegression_classifier,testing_set))
+	lr_classifier = SklearnClassifier(LogisticRegression())
+	lr_classifier.train(training_set)
+	print "LogisticRegression accuracy:"
+	print(nltk.classify.accuracy(lr_classifier, testing_set))
 	# 分类器持久化
-	save_classifier = open("pickle_algos/LogisticRegression_classifier.pickle","wb")
-	pickle.dump(classifier,save_classifier)
-	save_classifier.close()
+	classifier_file = open(pickle_path + "lr_classifier.pickle", "wb")
+	pickle.dump(classifier, classifier_file)
+	classifier_file.close()
 
 	# 线性支持向量机分类器-sklearn
-	LinearSVC_classifier = SklearnClassifier(LinearSVC())
-	LinearSVC_classifier.train(training_set)
-	print("线性支持向量机分类精度:")
-	print(nltk.classify.accuracy(LinearSVC_classifier,testing_set))
+	lsv_classifier = SklearnClassifier(LinearSVC())
+	lsv_classifier.train(training_set)
+	print "LinearSVC accuracy:"
+	print(nltk.classify.accuracy(lsv_classifier, testing_set))
 	# 分类器持久化
-	save_classifier = open("pickle_algos/LinearSVC_classifier.pickle","wb")
-	pickle.dump(classifier,save_classifier)
-	save_classifier.close()
+	classifier_file = open(pickle_path + "lsv_classifier.pickle", "wb")
+	pickle.dump(classifier, classifier_file)
+	classifier_file.close()
 
 	# 梯度下降分类器-sklearn
-	SGDC_classifier = SklearnClassifier(SGDClassifier())
-	SGDC_classifier.train(training_set)
-	print("梯度下降分类精度：")
-	print(nltk.classify.accuracy(SGDC_classifier,testing_set))
+	sgd_classifier = SklearnClassifier(SGDClassifier())
+	sgd_classifier.train(training_set)
+	print "SGDClassifier accuracy:"
+	print(nltk.classify.accuracy(sgd_classifier, testing_set))
 	# 分类器持久化
-	save_classifier = open("pickle_algos/SGDC_classifier.pickle","wb")
-	pickle.dump(classifier,save_classifier)
-	save_classifier.close()
+	classifier_file = open(pickle_path + "sgd_classifier.pickle","wb")
+	pickle.dump(classifier, classifier_file)
+	classifier_file.close()
