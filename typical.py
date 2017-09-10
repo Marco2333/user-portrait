@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*- 
 from app.database import MongoDB
-from app.portrayal.career_classify import training, classify
-from app.portrayal.tools import preprocess
-from app.portrayal.career_classify import preprocess as training_preprocess
-
 import nltk
+
+from nltk.tokenize import word_tokenize
+# from app.portrayal.career_classify import training, classify
+# from app.portrayal.tools import preprocess
+# from app.portrayal.career_classify import preprocess as training_preprocess
+
+from app.portrayal.sentiment_classify import training as sentiment_training, sentiment_dict, sentiment_classify
+
 def classify_career():
 	db = MongoDB().connect('dump')
 	users = db['typical_temp'].find({'category': 'Education'})
@@ -36,8 +40,7 @@ def classify_career():
 	print n
 
 if __name__ == "__main__":
-	# training.training()
-	# training_preprocess.delete_ambiguity(['Economy', 'Technology'])
-	# training.training_special_category(['Economy', 'Technology'])
-	# classify_career()
-	print nltk.pos_tag('i am boy')
+	db = MongoDB().connect('dump')
+	u = db['typical_temp'].find_one({"screen_name": 'SenTedCruz'}, {"tweets": 1})
+	sentiment_classify.sentiment_with_time(u['tweets'])
+	# print nltk.pos_tag(word_tokenize('i am boy'))
