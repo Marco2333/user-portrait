@@ -45,8 +45,3 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
-./portrayal/*
-./app/portrayal/career_classify/data
-./app/portrayal/career_classify/data_category
-./app/portrayal/career_classify/data_processed
-./app/portrayal/career_classify/data_pruned
