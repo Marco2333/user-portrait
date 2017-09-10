@@ -12,15 +12,21 @@ sys.setdefaultencoding('utf-8')
 
 stop_words = get_stop_words()
 
+def data_cleaning(text):
+	# clear @/#/链接/RT
+	return re.sub(r'^RT @\w+:|@\w+|#|(ht|f)tp[^\s]+', "", text)
+
+
 def preprocess(text, return_type = "string"):
 	text = re.sub(r'^RT @\w+:|@\w+|#|(ht|f)tp[^\s]+', "", text)
 	text = text.lower()
-
+	text = re.sub(r'new york', "NewYork", text)
+	
 	try:
 		words = word_tokenize(text)
 	except Exception as e:
 		print e
-		return
+		return None
 
 	word_list = [w for w in words if w not in stop_words and w.isalpha()]
 
@@ -30,13 +36,14 @@ def preprocess(text, return_type = "string"):
 def preprocess_postag(text):
 	text = re.sub(r'^RT @\w+:|@\w+|#|(ht|f)tp[^\s]+', "", text)
 	text = text.lower()
-
+	text = re.sub(r'new york',"NewYork", text)
+	
 	try:
 		words = word_tokenize(text)
 		word_tags = nltk.pos_tag(words)
 	except Exception as e:
 		print e
-		return
+		return None
 	
 	res = []
 	for item in word_tags:

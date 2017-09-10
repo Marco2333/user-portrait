@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
+import time
+import datetime
+
 from ... config import PROJECT_PATH
 
-
+'''
+读取停用词
+'''
 def get_stop_words(file_path = PROJECT_PATH + "portrayal/resource/stop_words.txt"):
 	stop_words = set()
 
@@ -31,7 +36,7 @@ def calc_time_differ(t1, t2):
 返回：
 	二维推文列表
 '''
-def split_tweets_by_month(tweets = [], period = 1):
+def split_tweets_same_time(tweets = [], period = 1):
 	threshold = period * 30
 	
 	if len(tweets) == 0:
@@ -55,6 +60,32 @@ def split_tweets_by_month(tweets = [], period = 1):
 			tts.append(tweet)
 
 	if len(tts) != 0:
+		tweets_list.append(tts)
+
+	return tweets_list if len(tweets_list[-1]) > 40 else tweets_list[0 : -1]
+
+
+def split_tweets_same_count(tweets = [], count = 80):
+	count = count if count <= 150 else 150
+	count = count if count >= 60 else 60
+
+	if len(tweets) < 1200:
+		count = 60
+
+	tts = []
+	tweets_list = []
+
+	i = 0
+	for tweet in tweets:
+		i += 1
+		tts.append(tweet)
+
+		if i > count:
+			tweets_list.append(tts)
+			tts = []
+			i = 0
+
+	if len(tts) > 40:
 		tweets_list.append(tts)
 
 	return tweets_list
