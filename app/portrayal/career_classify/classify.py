@@ -82,16 +82,15 @@ def exe_classify(text = None):
 	}
 
 	category, categories_score = classify(text)
-	# print category, categories_score
 
 	if related_category_dict.has_key(category):
 		for related_category in related_category_dict[category]:
 			if (categories_score[category] < categories_score[related_category] * 2) and (categories_score[category] - categories_score[related_category]) < 36:
 				category_temp, categories_score_temp = classify_special_category([category, related_category], text)
 				
-				if category_temp != category_temp:
-					if categories_score_temp[category_temp] < categories_score_temp[category] * 1.2:
-						continue
+				if category_temp != category:
+					# if categories_score_temp[category_temp] < categories_score_temp[category] * 1.2:
+					# 	continue
 
 					categories_score[category_temp] = categories_score[category] + (categories_score_temp[category_temp] - categories_score_temp[category]) * 5
 					
