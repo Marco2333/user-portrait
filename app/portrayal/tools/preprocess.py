@@ -14,12 +14,12 @@ stop_words = get_stop_words()
 
 def data_cleaning(text):
 	# clear @/#/链接/RT
-	return re.sub(r'^RT @\w+:|@\w+|#|(ht|f)tp[^\s]+', "", text)
+	return re.sub(r'RT @\w+:|@\w+|#|(ht|f)tp[^\s]+', " ", text)
 
 
 def preprocess(text, return_type = "string"):
-	text = re.sub(r'^RT @\w+:|@\w+|#|(ht|f)tp[^\s]+', "", text)
 	text = text.lower()
+	text = re.sub(r'rt @\w+:|@\w+|#|(ht|f)tp[^\s]+', " ", text)
 	text = re.sub(r'new york', "NewYork", text)
 	
 	try:
@@ -34,8 +34,9 @@ def preprocess(text, return_type = "string"):
 
 
 def preprocess_postag(text):
-	text = re.sub(r'^RT @\w+:|@\w+|#|(ht|f)tp[^\s]+', "", text)
 	text = text.lower()
+	text = re.sub(r'#(\w+)', "label\g<1>label ", text)
+	text = re.sub(r'@\w+:?|#|\s+rt\s+|(ht|f)tp[^\s]+', " ", text)
 	text = re.sub(r'new york',"NewYork", text)
 	
 	try:

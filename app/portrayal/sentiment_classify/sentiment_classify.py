@@ -82,31 +82,3 @@ def sentiment_with_count(tweets, classify_type = 0, count = 80):
 			sequence2.append(score)
 
 	return sequence1, sequence2
-
-
-def test():
-	file = open(module_path + 'data/positive.txt', "r").read()
-
-	n = 0
-	text = ''
-	n1 = 0
-	n2 = 0
-	for p in file.split("\n"):
-		n += 1
-		text += p + ' '
-		
-		if n % 80 == 0:
-			# score = calc_sentiment_score(text)
-			res = classify(text)
-			n1 += 1
-
-			if res == 'pos':
-				n2 += 1
-
-			text = ''
-			print res
-			# print score
-	
-	
-	print n1
-	print n2

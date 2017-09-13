@@ -50,4 +50,11 @@ Temporary Items
 /app/portrayal/career_classify/data_category
 /app/portrayal/career_classify/data_processed
 /app/portrayal/career_classify/data_pruned
+/app/portrayal/career_classify/pickle
+/app/portrayal/career_classify/pickle_category
+/app/portrayal/career_classify/statistics
 /app/portrayal/interest_extract/data
+/app/portrayal/interest_extract/pickle
+/app/portrayal/sentiment_classify/data
+/app/portrayal/sentiment_classify/data1
+/app/portrayal/sentiment_classify/pickle

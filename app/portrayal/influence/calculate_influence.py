@@ -133,8 +133,7 @@ def calculate_influence(followers_count, tweets):
 
 	follower_influence = calc_follower_influence(followers_count)
 
-	print activity, tweet_influence, follower_influence
-	return (0.5 * tweet_influence + 0.2 * activity + 0.3 * follower_influence) * 10
+	return (0.5 * tweet_influence + 0.2 * activity + 0.3 * follower_influence) * 10, activity
 
 
 if __name__ == '__main__':
