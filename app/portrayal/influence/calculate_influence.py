@@ -7,8 +7,9 @@
 '''
 import re
 import math
+import time
 
-from .. tools.function import split_tweets_same_time
+from .. tools.function import split_tweets_same_time, calc_time_differ
 
 
 '''
@@ -134,11 +135,3 @@ def calculate_influence(followers_count, tweets):
 	follower_influence = calc_follower_influence(followers_count)
 
 	return (0.5 * tweet_influence + 0.2 * activity + 0.3 * follower_influence) * 10, activity
-
-
-if __name__ == '__main__':
-	client = MongoClient('127.0.0.1', 27017)
-	db = client['dump']
-	a = db['typical_temp'].find_one({'screen_name': 'BarackObama'})
-
-	print calc_activity_sequence(a['tweets'])

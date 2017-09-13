@@ -60,10 +60,14 @@ def extract_interset():
 
 
 if __name__ == "__main__":
-	extract_interset()
+	# extract_interset()
 
+	# text = "@me i love u hankfjdak"
+	# text = re.sub(r'(rt)?\s?@\w+:?|#|(ht|f)tp[^\s]+', " ", text)
+	# print text
 	# preprocess.preprocess_postag(text.replace('\n',' '))
 	# print nltk.pos_tag(word_tokenize('i am #boy'))
 	# interest_extract.import_corpus()
 	# print re.sub(r'#(\w+)', "label\g<1>label", '#12334 e')
 	
+	print re.sub(r'#(\w+)', "<a href='http://www.twitter.com' target='_blank'>#\g<1></a>", "#abc")

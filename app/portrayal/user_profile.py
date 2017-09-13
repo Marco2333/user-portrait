@@ -1,5 +1,5 @@
 from sentiment_classify import sentiment_classify
-from career_classify.classify import career_classify
+from career_classify.classify import exe_classify
 from interest_extract.interest_extract import extract_tags
 from influence.calculate_influence import calculate_influence, calc_activity_sequence
 
@@ -20,9 +20,9 @@ def user_profile(user):
 	for tweet in tweets:
 		text += tweet['text']
 
-	category, categories_score = career_classify(text)
+	category, categories_score = exe_classify(text)
 	user['category'] = category
-	user['categories_score'] = categories_score
+	user['category_score'] = categories_score
 
 	user['interest_tags'] = extract_tags(text, user['description'])
 
@@ -30,6 +30,6 @@ def user_profile(user):
 	user['influence_score'] = influence_score
 	user['activity'] = activity
 
-	user['activity_list'] calc_activity_sequence(tweets)
+	user['activity_list'] = calc_activity_sequence(tweets)
 
 	return user

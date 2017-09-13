@@ -36,7 +36,7 @@ def preprocess(text, return_type = "string"):
 def preprocess_postag(text):
 	text = text.lower()
 	text = re.sub(r'#(\w+)', "label\g<1>label ", text)
-	text = re.sub(r'@\w+:?|#|\s+rt\s+|(ht|f)tp[^\s]+', " ", text)
+	text = re.sub(r'(rt)?\s?@\w+:?|#|(ht|f)tp[^\s]+', " ", text)
 	text = re.sub(r'new york',"NewYork", text)
 	
 	try:

@@ -5,8 +5,9 @@
  * @Last Modified by: Marco 
  * @Last Modified time: 2017-09-09 14:29:43 
 '''
+import os
 import pickle
-
+import training
 from statistics import mode
 
 from .. tools.preprocess import preprocess
@@ -37,6 +38,9 @@ class VotingClassifier:
 
 		# 加载之前保存的训练好的分类器模型
 		for name in classifier_names:
+			if not os.path.exists(pickle_path + name + ".pickle"):
+				training.training()
+
 			classifier_file = open(pickle_path + name + ".pickle", "rb")
 			classifier = pickle.load(classifier_file)
 			classifier_file.close()

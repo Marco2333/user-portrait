@@ -12,7 +12,6 @@ module_path = PROJECT_PATH + "portrayal/career_classify"
 data_dir = module_path + '/data/'
 data_processed_dir = module_path + '/data_processed/'
 statistics_dir = module_path + '/statistics/'
-# data_pruned_dir = module_path + '/data_pruned/'
 data_category_dir = module_path + '/data_category/'
 
 def process_training_data():
