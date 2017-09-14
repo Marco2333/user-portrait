@@ -18,7 +18,7 @@ from sklearn.linear_model import LogisticRegression, SGDClassifier
 
 from .. tools.function import get_stop_words
 from .. tools.preprocess import preprocess, preprocess_postag
-from ... config import PROJECT_PATH
+from .. config import PROJECT_PATH
 
 stop_words = get_stop_words()
 module_path = PROJECT_PATH + "portrayal/sentiment_classify/"

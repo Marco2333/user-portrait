@@ -35,7 +35,6 @@ all
 allow
 allows
 almost
-alone
 along
 already
 also
@@ -61,8 +60,6 @@ anywhere
 apart
 apparently
 appear
-appreciate
-appropriate
 approximately
 are
 area
@@ -81,9 +78,7 @@ asks
 associated
 at
 auth
-available
 away
-awfully
 b
 back
 backed
@@ -268,9 +263,6 @@ good
 goods
 got
 gotten
-great
-greater
-greatest
 greetings
 group
 grouped
@@ -351,12 +343,7 @@ information
 inner
 insofar
 instead
-interest
-interested
-interesting
-interests
 into
-invention
 inward
 is
 isn't
@@ -585,7 +572,6 @@ rd
 re
 readily
 really
-reasonably
 recent
 recently
 ref
@@ -605,6 +591,7 @@ room
 rooms
 run
 RT
+rt
 s
 said
 same
@@ -648,8 +635,6 @@ showns
 shows
 side
 sides
-significant
-significantly
 similar
 similarly
 since
@@ -684,7 +669,6 @@ sub
 substantially
 successfully
 such
-sufficiently
 suggest
 sup
 sure

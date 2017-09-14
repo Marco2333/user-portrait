@@ -5,7 +5,7 @@ import pickle
 from nltk.tokenize import word_tokenize
 
 from .. tools.preprocess import preprocess
-from ... config import PROJECT_PATH
+from .. config import PROJECT_PATH
 
 
 module_path = PROJECT_PATH + "portrayal/career_classify"

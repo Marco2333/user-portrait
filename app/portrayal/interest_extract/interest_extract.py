@@ -15,7 +15,7 @@ from nltk.stem import WordNetLemmatizer
 
 from .. tools.preprocess import preprocess_postag
 
-from ... config import PROJECT_PATH
+from .. config import PROJECT_PATH
 
 module_path = PROJECT_PATH + "portrayal/interest_extract/"
 data_path = module_path + "data/"

@@ -2,7 +2,7 @@
 import sys
 import xml.dom.minidom
 
-from ... config import PROJECT_PATH, XML_PATH
+from .. config import PROJECT_PATH, XML_PATH
 
 reload(sys)
 sys.setdefaultencoding('utf8')

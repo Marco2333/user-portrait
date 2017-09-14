@@ -15,7 +15,7 @@ from sklearn.feature_extraction.text import TfidfTransformer
 
 from sklearn.naive_bayes import MultinomialNB
 
-from ... config import PROJECT_PATH
+from .. config import PROJECT_PATH
 
 module_path = PROJECT_PATH + "portrayal/career_classify/"
 

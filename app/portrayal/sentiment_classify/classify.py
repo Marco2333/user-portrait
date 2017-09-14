@@ -11,7 +11,7 @@ import training
 from statistics import mode
 
 from .. tools.preprocess import preprocess
-from ... config import PROJECT_PATH
+from .. config import PROJECT_PATH
 
 
 module_path = PROJECT_PATH + "portrayal/sentiment_classify/"

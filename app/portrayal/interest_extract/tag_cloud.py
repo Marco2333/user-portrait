@@ -4,7 +4,7 @@ import re
 from pytagcloud import create_tag_image, make_tags
 from pytagcloud.lang.counter import get_tag_counts
 
-from ... config import PROJECT_PATH
+from .. config import PROJECT_PATH
 
 file_path = PROJECT_PATH + "portrayal/resource/tag_cloud/"
 

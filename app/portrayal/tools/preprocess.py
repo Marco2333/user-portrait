@@ -14,14 +14,19 @@ stop_words = get_stop_words()
 
 def data_cleaning(text):
 	# clear @/#/链接/RT
-	return re.sub(r'RT @\w+:|@\w+|#|(ht|f)tp[^\s]+', " ", text)
+	text = text.replace('wanna', 'want to')
+	text = text.replace('gonna', 'will')
+
+	return re.sub(r'(rt)?\s?(@\w+)?:?|#|(ht|f)tp[^\s]+', " ", text)
 
 
 def preprocess(text, return_type = "string"):
 	text = text.lower()
 	text = re.sub(r'rt @\w+:|@\w+|#|(ht|f)tp[^\s]+', " ", text)
-	text = re.sub(r'new york', "NewYork", text)
-	
+	# text = re.sub(r'new york', "NewYork", text)
+	# text = text.replace('wanna', 'want to')
+	# text = text.replace('gonna', 'will')
+
 	try:
 		words = word_tokenize(text)
 	except Exception as e:
@@ -38,7 +43,9 @@ def preprocess_postag(text):
 	text = re.sub(r'#(\w+)', "label\g<1>label ", text)
 	text = re.sub(r'(rt)?\s?@\w+:?|#|(ht|f)tp[^\s]+', " ", text)
 	text = re.sub(r'new york',"NewYork", text)
-	
+	# text = text.replace('wanna', 'want to')
+	# text = text.replace('gonna', 'will')
+
 	try:
 		words = word_tokenize(text)
 		word_tags = nltk.pos_tag(words)

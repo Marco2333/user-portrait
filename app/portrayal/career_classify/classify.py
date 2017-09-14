@@ -8,7 +8,7 @@
 import math
 import pickle
 
-from ... config import PROJECT_PATH
+from .. config import PROJECT_PATH
 
 module_path = PROJECT_PATH + "portrayal/career_classify/"
 

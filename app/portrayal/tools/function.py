@@ -2,7 +2,7 @@
 import time
 import datetime
 
-from ... config import PROJECT_PATH
+from .. config import PROJECT_PATH
 
 '''
 读取停用词
