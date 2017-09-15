@@ -164,4 +164,4 @@ def extract_tags(text, description = '', count = 30):
 			
 			res_tags.append(item)
 	
-	return re.sub('label(\w+)label', '#\g<1>' , ','.join(res_tags[:count]))	
+	return re.sub(r'label(\w+)label', r'#\1' , ','.join(res_tags[:count]))	

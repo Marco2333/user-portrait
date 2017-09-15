@@ -21,7 +21,7 @@ def generate_tag_cloud(text, user_id):
 	tags = make_tags(word_count, maxsize = 66)
 
 	for item in tags:
-		item['tag'] = re.sub(r'label(\w+)label','#\g<1>', item['tag'])
+		item['tag'] = re.sub(r'label(\w+)label',r'#\1', item['tag'])
 
 	file_name = file_path + '%d.png' % user_id
 	create_tag_image(tags, file_name, size = (780, 580), fontname = 'Lobster',  background=(0, 0, 0, 0))

@@ -14,9 +14,9 @@ stop_words = get_stop_words()
 
 def data_cleaning(text):
 	# clear @/#/链接/RT
-	text = text.replace('wanna', 'want to')
-	text = text.replace('gonna', 'will')
-
+	# 去除表达较口语化的语言时，经常使用重复的字符
+	text = re.sub(r"(\w)\1{2,}", r"\1\1", text)
+	text = re.sub(r"(..)\1{2,}", r"\1\1", text)
 	return re.sub(r'(rt)?\s?(@\w+)?:?|#|(ht|f)tp[^\s]+', " ", text)
 
 

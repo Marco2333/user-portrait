@@ -8,6 +8,7 @@
 import re
 import os
 import sys
+import math
 import nltk
 import pickle
 
@@ -18,11 +19,12 @@ from nltk.tokenize import word_tokenize
 from .. config import PROJECT_PATH
 from .. tools.preprocess import preprocess_postag
 from .. tools.function import get_stop_words
+from .. tools.function import get_slang
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-
+slang = get_slang()
 stop_words = get_stop_words()
 
 module_path = PROJECT_PATH + "portrayal/sentiment_classify/"
@@ -36,17 +38,31 @@ class SentimentDict:
 		tweets = [{"text": tweets}]
 		res = []
 		but_words = set(["but", "however"])
+		hope_words = set(["hope", "wish"])
 		deny_words = set(['not', "n't", 'no', 'never', 'none', 'hardly'])
 		degree_words = set(["fairly", "pretty", "quite", "very", "much", "too", "greatly", "highly", "really", "extremely", "so"])
 
 		for tweet in tweets:
 			text = tweet['text']
+			text = re.sub(r"(\w)\1{2,}", r"\1\1", text)
+			text = re.sub(r"(..)\1{2,}", r"\1\1", text)
+			text = re.sub(r'(rt)?\s?@\w+:?|#|(ht|f)tp[^\s]+', " ", text).lower()
+
 			text = text.replace('wanna', 'want to')
 			text = text.replace('gonna', 'will')
-			text = re.sub(r'(rt)?\s@\w+:?|#|(ht|f)tp[^\s]+', " ", text).lower()
+			text = text.replace('gotta', 'must')
+			text = text.replace('have to', 'haveto')
+			text = text.replace('haha', 'happy')
+			text = text.replace('hungrryy', 'hungry')
 			try:
 				words = word_tokenize(text)
+
+				for i in range(len(words)):
+					if words[i] in slang:
+						words[i] = slang[words[i]]
+
 				word_tags = nltk.pos_tag(words)
+
 			except Exception as e:
 				print e
 				continue
@@ -54,12 +70,12 @@ class SentimentDict:
 			deny = False
 			degree = False
 			but = False
+			hope = False
 
 			length = len(word_tags)
 			
 			for i in range(length):
 				item = word_tags[i]
-
 				word = item[0]
 				
 				if word in deny_words:
@@ -68,30 +84,38 @@ class SentimentDict:
 				elif word in but_words:
 					but = True
 					j = i - 1
-					
-					while j >= 0 and word_tags[j][0].isalpha():
+					flag = True
+
+					while j >= 0 and (flag or word_tags[j][0].isalpha()):
+						if not word_tags[j][0].isalpha() or i - j > 2:
+							flag = False
+
 						w_t = word_tags[j][0]
 						t_t = word_tags[j][1][0]
 						if w_t not in stop_words:
-							# if t_t == 'N':
-							# 	# res.append((prefix + word, 'n'))
-							# 	pass
+							flag = False
 							if t_t == 'J':
 								res.append(("FOT_" + w_t, 'a'))
 							elif t_t == 'V':
 								res.append(("FOT_" + w_t, 'v'))
 							elif t_t == 'R':
 								res.append(("FOT_" + w_t, 'r'))
+							elif t_t == 'N':
+								res.append(("FOT_" + w_t, 'n'))
 							
 						j -= 1
 					continue
 				elif word in degree_words:
 					degree = True
 					continue
+				elif word in hope_words:
+					hope = True
+					continue
 
 				if not word.isalpha():
 					deny = False
 					degree = False
+					hope = False
 
 					if i == 0 or word_tags[i - 1] not in but_words:
 						but = False
@@ -100,19 +124,20 @@ class SentimentDict:
 					prefix = ""
 					if deny:
 						prefix += "NOT_"
+					if hope:
+						prefix += "HOP_"
 					if degree and item[1][0] == 'J':
 						prefix += "TWO_"
 
-					# if item[1][0] == 'N':
-					# 	# res.append((prefix + word, 'n'))
-					# 	pass
 					if item[1][0] == 'J':
 						res.append((prefix + word, 'a'))
 					elif item[1][0] == 'V':
 						res.append((prefix + word, 'v'))
 					elif item[1][0] == 'R':
 						res.append((prefix + word, 'r'))
-			
+					elif item[1][0] == 'N':
+						res.append((prefix + word, 'n'))
+
 		return res
 
 
@@ -124,6 +149,44 @@ class SentimentDict:
 			file = open(pickle_path + "sentiment_dict.pickle")
 			self.sentiment_dict = pickle.load(file)
 			file.close()
+	
+		# print self.sentiment_dict['inextinguishable#a']
+		# return
+
+		# if not self.sentiment_dict:
+		senti_file = open(module_path + "data/senti_wrods.txt").read()
+		sentiment_dict = {}
+
+		for line in senti_file.split("\n"):
+			sp = line.split("\t")
+			sentiment_dict[sp[0].strip()] = int(sp[1])
+
+		print len(self.sentiment_dict)
+		print self.sentiment_dict['sad#a']
+		for item in self.sentiment_dict:
+			sl = item.split("#")
+			if(sl[1] == 'a' or sl[1] == 'v' or sl[1] == 'r') and sl[0].isalpha() and (sl[0] not in sentiment_dict):
+				score = self.sentiment_dict[item] * 30 / 5
+
+				if int(score) > 5 or int(score) < -5:
+					print sl
+					print score
+				else:
+					if abs(score) >= 1:
+						sentiment_dict[sl[0]] = int(score)
+
+					elif abs(score) > 0.66:
+						if score < 0:
+							sentiment_dict[sl[0]] = -1
+						if score > 0:
+							sentiment_dict[sl[0]] = 1
+						
+				
+
+		senti_file = open(module_path + "data/temp.txt", 'w')
+		for item in sentiment_dict:
+			senti_file.write(item + "\t" + str(sentiment_dict[item]) + "\n")
+		return
 
 		score = 0
 		word_list = self.preprocess(tweets)
@@ -135,28 +198,41 @@ class SentimentDict:
 			rate = 1
 			word = word_tuple[0]
 			
-			print word + "#" + word_tuple[1]
-			if "NOT_" in word and "TWO_" not in word:
-				rate *= -0.7
-				word = word.replace("NOT_", '')
-			if "FOT_" in word:
-				rate *= -1
-				word = word.replace("FOT_", '')
-			if "TWO_" in word and "NOT_" not in word:
-				rate *= 2
-				word = word.replace("TWO_", '')
-			if "TWO_" in word and "NOT_" in word:
-				rate *= -0.6
-				word = word.replace("TWO_", '').replace("NOT_", '')
+			print word
 
-			key = word  + '#' + word_tuple[1]
+			if "FOT_" in word:
+				rate *= -0.9
+				word = word.replace("FOT_", '')
+
+			if "NOT_" in word:
+				if "TWO_" in word:
+					rate *= 0.4
+					word = word.replace("TWO_", '')
+				else:
+					rate *= -0.7
+
+				if "HOP_" in word:
+					rate *= -0.5
+					word = word.replace("HOP_", '')
+				
+				word = word.replace("NOT_", '')
+			else:
+				if "TWO_" in word:
+					rate *= 1.8
+					word = word.replace("TWO_", '')
+
+			key = word
+			# key = word  + '#' + word_tuple[1]
 			if key in self.sentiment_dict:
 				score += self.sentiment_dict[key] * rate
 				print score
-			elif (word_tuple[1] == 'r' or word_tuple[1] == 'v') and (word + '#a' in self.sentiment_dict):
-				score += self.sentiment_dict[word + '#a'] * rate
-				print score
-			
+			# elif (word_tuple[1] == 'r' or word_tuple[1] == 'v') and (word + '#a' in self.sentiment_dict):
+			# 	score += self.sentiment_dict[word + '#a'] * rate
+				# print score
+			# elif (word_tuple[1] == 'n') and (word + '#v' in self.sentiment_dict):
+			# 	score += self.sentiment_dict[word + '#v'] * rate
+				# print score
+
 		return score
 
 
@@ -186,6 +262,7 @@ class SentimentDict:
 
 				for w in syn_terms_list:
 					term_and_num = w.split("#")
+
 					syn_term = term_and_num[0] + "#" + word_type
 					term_num = int(term_and_num[1])
 
@@ -210,7 +287,7 @@ class SentimentDict:
 		file = open(pickle_path + "sentiment_dict.pickle", 'w')
 		pickle.dump(res, file)
 		file.close()
-		
+
 		return res
 
 
@@ -221,20 +298,9 @@ def calc_sentiment_score(text):
 
 
 def test():
-	calc_sentiment_score('''helou have just sent him an email &amp; gave him your url. he's in Iran in October for a few weeks &amp; then again in March - you never know :) . Only 1 more day of school! WOO! :D . @lickmycup
-cakes and then you and Shann could do a set together. And i could shoot it :D . @veganrunningmom yes garage band.  I will do your test no problem.  :) . @maskedfool Wow Kacie, a bit of a Merlin r
-ant there :D Colin is adorable. May I just add, here, for the third time, BETA JAPS. XD . @ejmatthews Wow, go in for it! Thanks. :) . #hoppusday is the best day ever :) . @steven_gehrke LOL Doubt
-less you meant what I think you meant by that remark about having all the right stuff in the right places! :-) . Shooting photos today it looks like... any models interested, let me know =) . @sa
-rasmile13 I am!!! Good morning. :) . Future for ambulances? http://news.bbc.co.uk/1/hi/health/7986460.stm i want one! :D . @RachelMcAdams_  - LMAO! ur such a dork :) . @timmeh Certainly no fun th
-ere. Hopefully if you keep smiling you'll be back to 110% in no time! :) . is back in the USA and couldnt be happier :) . off to study for geography :) . @oh_mondieu cool. did you go say hi or ta
-ke a picture? :D . anyway, goodnight twitterberries, i think i'm heading off to bed for the day.  Have a wonderful day, since most of you are just waking up :) . @OfficialJagex Mod Ajd will you b
-e there tonight? :) . REBEKAH GIBNEY WON THE GOLD LOGIE :D !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! . Welcome to the VIP Chauffeur Twitter Stream :) . Hi @HalElrod Tks and look forward to reading yr tweet
-s. I just subscribed to your 'Miracle Morning' audio too :) . @supercoolkp haha! At least it wasn't my finger on my lip again  :D . Want to cut my hair as Lightning :D . True friend - someone who
- sings you to sleep. :) . @MISSMYA ...Miss Mya u gotta get sleep. ...come on, just 2 hours ...jus do it :-) . Swine flu on Twitter! :D #atchoink #failpig #swineflu #grippeporcine #porkfever #hamt
-hrax #bacontherapy (URL: http://tinyurl.com/c7oc5f ) . @cmykdorothy I've had the dream once where my teeth fell out; lol re: women's conference :) . @imogenfreeland You're not alone luvvie! This
-is like like high school ALL over again :) . thirty one days...now counting weekends :) . is mixing a song called &quot; Tempo17&quot; and well.. it's tough. :D .''')
+	calc_sentiment_score('''the lead actors share no chemistry or engaging charisma . we don't even like their characters .  . some writer dude , i think his name was , uh , michael zaidan , was supposed to have like written the screenplay or something , but , dude , the only thing that i ever saw that was written down were the zeroes on my paycheck.  . the movie doesn't generate a lot of energy . it is dark , brooding and slow , and takes its central idea way too seriously .  . this feature is about as necessary as a hole in the head . the cinematic equivalent of patronizing a bar favored by pretentious , untalented artistes who enjoy moaning about their cruel fate.  . spectators will indeed sit open-mouthed before the screen , not screaming but yawning .  . it feels like very light errol morris , focusing on eccentricity but failing , ultimately , to make something bigger out of its scrapbook of oddballs .  . a period story about a catholic boy who tries to help a jewish friend get into heaven by sending the audience straight to hell .  . the premise itself is just sooooo tired . pair that with really poor comedic writing . . . and you've got a huge mess .  . proves a lovely trifle that , unfortunately , is a little too in love with its own cuteness .  . did we really need a remake of " charade ? " . some movies can get by without being funny simply by structuring the scenes as if they were jokes : a setup , delivery and payoff . stealing harvard can't even do that much . each scene immediately succumbs to gravity and plummets to earth .  . the only fun part of the movie is playing the obvious game . you try to guess the order in which the kids in the house will be gored .  . i spied with my little eye . . . a mediocre collection of cookie-cutter action scenes and occasionally inspired dialogue bits . entertains not so much because of its music or comic antics , but through the perverse pleasure of watching disney scrape the bottom of its own cracker barrel .  . the satire is just too easy to be genuinely satisfying .  . bearable . barely .  . less funny than it should be and less funny thanit thinks it is .  . an " o bruin , where art thou ? " -style cross-country adventure . . . it has sporadic bursts of liveliness , some so-so slapstick and a fewear-pleasing songs on its soundtrack .  . a feeble tootsie knockoff .  . an awful movie that will only satisfy the most emotionally malleable of filmgoers .  . 鍗糷e story is far-flung , illogical , and plain stupid .  . the very simple story seems too simple and the working out of the plot almost arbitrary .  . an allegory concerning the chronically mixed signals african american professionals get about overachieving could be intriguing , but the supernatural trappings only obscure the message .  . a very familiar tale , one that's been told by countless filmmakers about italian- , chinese- , irish- , latin- , indian- , russian- and otherhyphenate american young men struggling to balance conflicting cultural messages .  . one key problem with these ardently christian storylines is that there is never any question of how things will turn out .  . essentially , the film is weak on detail and strong on personality . a relentless , bombastic and ultimately empty world war ii action flick .  . [hell is] looking down at your watch and realizing serving sara isn't even halfway through .  . too long , and larded with exposition , this somber cop drama ultimately feels as flat as the scruffy sands of its titular community .  . ''')
  	return
-	file = open(module_path + 'data/positive.txt').read()
+	file = open(module_path + 'data1/negative.txt').read()
 
 	n = 0
 	text = ''
@@ -247,7 +313,7 @@ is like like high school ALL over again :) . thirty one days...now counting week
 			x += 1
 			score = calc_sentiment_score(text)
 			print score
-			if score < 0:
+			if score > 0:
 				print text
 				y += 1
 			

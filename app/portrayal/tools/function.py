@@ -4,11 +4,19 @@ import datetime
 
 from .. config import PROJECT_PATH
 
+slang = None
+stop_words = None
+
 '''
 读取停用词
 '''
 def get_stop_words(file_path = PROJECT_PATH + "portrayal/resource/stop_words.txt"):
-	stop_words = set()
+	global stop_words
+
+	if not stop_words:
+		stop_words = set()
+	else:
+		return stop_words
 
 	file = open(file_path, "r")  
 	for line in file:  
@@ -17,6 +25,27 @@ def get_stop_words(file_path = PROJECT_PATH + "portrayal/resource/stop_words.txt
 	file.close()  
 
 	return stop_words
+
+
+'''
+读取俚语
+'''
+def get_slang(file_path = PROJECT_PATH + "portrayal/resource/slang.txt"):
+	global slang
+
+	if not slang:
+		slang = {}
+	else:
+		return slang
+
+	file = open(file_path, "r")  
+	for line in file:  
+		l_l = line.split(":")
+		slang[l_l[0].strip()] = l_l[1]
+
+	file.close()  
+
+	return slang
 
 
 '''
