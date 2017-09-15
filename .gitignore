@@ -58,3 +58,4 @@ Temporary Items
 /app/portrayal/sentiment_classify/data
 /app/portrayal/sentiment_classify/data1
 /app/portrayal/sentiment_classify/pickle
+.pyc

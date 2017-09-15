@@ -48,7 +48,11 @@ class VotingClassifier:
 			self.classifier_list.append(classifier)
 		
 
-	def classify(self, text):
+	def classify(self, tts):
+		text = ''
+		for item in tts:
+			text += item['text'] + ' '
+
 		if len(self.classifier_list) == 0:
 			self.load_classifier()
 		

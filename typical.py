@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*- 
 # from app.database import MongoDB
 # import nltk
-# import re
+import re
 # from nltk.tokenize import word_tokenize
 # # from app.portrayal.career_classify import training, classify
 # # from app.portrayal.tools import preprocess
@@ -75,6 +75,7 @@ if __name__ == "__main__":
 	# profile()
 	# print nltk.word_tokenize("I h2ppy ha-hha hi i love lu")
 	
+	# print re.sub(r"(..)\1{2,}", r"\1\1", "ahahahahah")
 	# print re.sub(r"(\w)\1{2,}", r"\1", "I’m in a hurrryyyyy")
 	# print "I’m in a hurrryyyyy".replace("(.)\1{1,}", "\1\1")
 	sentiment_dict.test()
