@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*- 
-# from app.database import MongoDB
+from app.database import MongoDB
 # import nltk
 import re
 # from nltk.tokenize import word_tokenize
 # # from app.portrayal.career_classify import training, classify
 # # from app.portrayal.tools import preprocess
 # # from app.portrayal.career_classify import preprocess as training_preprocess
-from app.portrayal.sentiment_classify import sentiment_dict
-# from app.portrayal.interest_extract import interest_extract
+# from app.portrayal.sentiment_classify import sentiment_classify
+from app.portrayal.interest_extract import interest_extract
 # from app.portrayal.tools import preprocess
 # from app.portrayal.user_profile import user_profile
-
+from app.portrayal.config import PROJECT_PATH
 
 def classify_career():
 	db = MongoDB().connect('dump')
-	users = db['typical_temp'].find({'category': 'Education'})
+	users = db['typical_temp'].find({'category': 'Bloomberg'})
 
 	err_dict = {}
 	n = 0
@@ -42,9 +42,9 @@ def classify_career():
 	print n
 
 def extract_interset():
-	db = MongoDB().connect()
-	users = db['typical'].find()
-
+	db = MongoDB().connect('dump')
+	users = db['typical_temp'].find({'screen_name': 'WWEDanielBryan'})
+	
 	for u in users:
 		text = ''
 		for item in u['tweets']:
@@ -56,26 +56,38 @@ def extract_interset():
 			print u['_id']
 			print e
 			continue
-
+	
 		db['typical'].update({'_id': u['_id']}, {"$set": {"interest_tags": tags}})
 
 
 def profile():
 	db = MongoDB().connect()
-	users = db['typical'].find().limit(1)
-
+	users = db['typical'].find().skip(3).limit(5)
+	
 	for user in users:
 		temp = user_profile(user)
 		del temp['tweets']
 		print temp
 
 
+def calc_sentiment():
+	db = MongoDB().connect('dump')
+	users = db['typical_temp'].find().skip(3).limit(1)
+
+	for user in users:
+		print sentiment_classify.exe_sentiment_classify(user['tweets'])
+
 if __name__ == "__main__":
-	# extract_interset()
-	# profile()
-	# print nltk.word_tokenize("I h2ppy ha-hha hi i love lu")
+	# calc_sentiment()
+	# sentiment_dict.test()
+
+	# file = open(PROJECT_PATH + "portrayal/sentiment_classify/data/positive.txt").read()
+	# print sentiment_classify.exe_sentiment_classify(tweets)
+
+	extract_interset()
 	
-	# print re.sub(r"(..)\1{2,}", r"\1\1", "ahahahahah")
-	# print re.sub(r"(\w)\1{2,}", r"\1", "I’m in a hurrryyyyy")
-	# print "I’m in a hurrryyyyy".replace("(.)\1{1,}", "\1\1")
-	sentiment_dict.test()
+	# db = MongoDB().connect('dump')
+	# user = db['typical_temp'].find_one({'screen_name': 'David_Cameron'})
+
+	# for t in user['tweets']:
+	# 	print t['text']

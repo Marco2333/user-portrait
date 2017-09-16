@@ -167,6 +167,7 @@ differently
 discuss
 do
 does
+doesn
 doesn't
 doing
 don't
@@ -270,6 +271,7 @@ grouping
 groups
 guy
 God
+god
 h
 haha
 had
@@ -680,6 +682,7 @@ taking
 tell
 tends
 th
+thx
 than
 thank
 thanks

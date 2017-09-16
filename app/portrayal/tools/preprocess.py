@@ -39,11 +39,25 @@ def preprocess(text, return_type = "string"):
 	return word_list if return_type == 'list' else ' '.join(word_list)
 
 
+def preprocess_del_stopwords(text):
+	try:
+		words = word_tokenize(text)
+	except Exception as e:
+		print e
+		return None
+
+	word_list = [w for w in words if w not in stop_words and w.isalpha()]
+
+	return word_list
+
+
 def preprocess_postag(text):
 	text = text.lower()
+	text = re.sub(r"(\w)\1{2,}", r"\1\1", text)
+	text = re.sub(r"(..)\1{2,}", r"\1\1", text)
 	text = re.sub(r'#(\w+)', "label\g<1>label ", text)
-	text = re.sub(r'(rt)?\s?@\w+:?|#|(ht|f)tp[^\s]+', " ", text)
-	text = re.sub(r'new york', "newyork", text)
+	text = re.sub(r'(rt)?\s?@\w+:?|#|hahah\w*|(ht|f)tp[^\s]+', " ", text)
+	text = text.replace('new york', "newyork").replace('lol', "laugh")
 
 	try:
 		words = word_tokenize(text)

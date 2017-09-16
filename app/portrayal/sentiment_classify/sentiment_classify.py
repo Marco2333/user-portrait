@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 import nltk
 
@@ -56,6 +57,8 @@ def replace_emotion(tweets):
 			'created_at': tweet['created_at']
 		})
 
+	return tweets_temp
+
 
 def sentiment_with_time(tweets, time_span = 1):
 	tweets_list = split_tweets_same_time(tweets, time_span)
@@ -71,11 +74,11 @@ def sentiment_with_time(tweets, time_span = 1):
 	
 		score = calc_sentiment_score(tts)
 		sequence2.append(score)
-
+		
 	return sequence1, sequence2
 
 
-def sentiment_with_count(tweets, count = 80):
+def sentiment_with_count(tweets, count = 50):
 	tweets_list = split_tweets_same_count(tweets, count)
 
 	sequence1 = []
@@ -97,7 +100,8 @@ def exe_sentiment_classify(tweets):
 	tweets = replace_emotion(tweets)
 
 	psy_with_count1, psy_with_count2 = sentiment_with_count(tweets)
-	psy_with_time1, psy_with_time2 = sentiment_with_time
+
+	psy_with_time1, psy_with_time2 = sentiment_with_time(tweets)
 
 	count = 0
 	for item in psy_with_time2:

@@ -127,7 +127,7 @@ class SentimentDict:
 		if not self.sentiment_dict:
 			self.sentiment_dict = {}
 
-			senti_file = open(module_path + "data/temp.txt").read()
+			senti_file = open(module_path + "data/sentiment_words.txt").read()
 
 			for line in senti_file.split("\n"):
 				sp = line.split("\t")
@@ -139,9 +139,8 @@ class SentimentDict:
 		if not word_list:
 			return None
 
-		for word_tuple in word_list:
+		for word in word_list:
 			rate = 1
-			word = word_tuple[0]
 
 			if "FOT_" in word:
 				rate *= -0.9
@@ -164,39 +163,13 @@ class SentimentDict:
 					rate *= 1.8
 					word = word.replace("TWO_", '')
 
-			key = word
-			
-			if key in self.sentiment_dict:
-				score += self.sentiment_dict[key] * rate
+			if word in self.sentiment_dict:
+				score += self.sentiment_dict[word] * rate
 
 		return score
 
 
 sentiment_dict = SentimentDict()
 
-def calc_sentiment_score(text):
-	return sentiment_dict.calc_sentiment_score(text)
-
-
-def test():
-	file = open(module_path + 'data/negative.txt').read()
-
-	n = 0
-	text = ''
-	x = 0
-	y = 0
-	for p in file.split('\n'):
-		n += 1
-		text += p + ' . '
-		if n % 30 == 0:
-			x += 1
-			score = calc_sentiment_score(text)
-			print score
-			if score > 0:
-				print text
-				y += 1
-			
-			text = ''
-	
-	print x
-	print y
+def calc_sentiment_score(tts):
+	return sentiment_dict.calc_sentiment_score(tts)

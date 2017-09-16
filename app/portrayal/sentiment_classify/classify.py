@@ -10,7 +10,7 @@ import pickle
 import training
 from statistics import mode
 
-from .. tools.preprocess import preprocess
+from .. tools.preprocess import preprocess_del_stopwords
 from .. config import PROJECT_PATH
 
 
@@ -80,7 +80,7 @@ class VotingClassifier:
 			self.words_feature = pickle.load(feature_file)
 			feature_file.close()
 
-		word_list = preprocess(document, "list")
+		word_list = preprocess_del_stopwords(document)
 
 		if not word_list:
 			return None

@@ -17,11 +17,15 @@ from .. tools.preprocess import preprocess_postag
 
 from .. config import PROJECT_PATH
 
+from .. tools.function import get_stop_words
+
+
 module_path = PROJECT_PATH + "portrayal/interest_extract/"
 data_path = module_path + "data/"
 pickle_path = module_path + "pickle/"
 
 corpus = None
+stop_words = get_stop_words()
 
 def generate_pickle():
 	files = os.listdir(data_path + 'corpus')
@@ -75,16 +79,20 @@ def generate_candidate(word_tags):
 	for item in word_tags:
 		if item[1][0] == 'N':
 			word = lemmatizer.lemmatize(item[0], 'n')
-			candidate_list.append(word)
+			if word not in stop_words:
+				candidate_list.append(word)
 		
 	if len(word_tags) == 2 and (word_tags[0][1][0] == 'J' or word_tags[0][1][0] == 'V') and word_tags[1][1][0] == 'N':
 		if word_tags[0][1][0] == 'J':
-			pos_type = 'a'
+			prefix = lemmatizer.lemmatize(word_tags[0][0], 'a')
 		
 		if word_tags[0][1][0] == 'V':
-			pos_type = 'v'
+			prefix = lemmatizer.lemmatize(word_tags[0][0], 'v')
 		
-		phrase_list.append(lemmatizer.lemmatize(word_tags[0][0], pos_type) + " " + lemmatizer.lemmatize(word_tags[1][0], 'n'))
+		suffix = lemmatizer.lemmatize(word_tags[1][0], 'n')
+
+		if prefix not in stop_words and suffix not in stop_words:
+			phrase_list.append(prefix + " " + suffix)
 
 	i = 0
 	while(i < len(word_tags) - 2):
@@ -95,20 +103,38 @@ def generate_candidate(word_tags):
 				phrase_list.append(lemmatizer.lemmatize(word_tags[i][0], 'v') + " " + suffix)
 				i += 3
 			else:
-				phrase_list.append(lemmatizer.lemmatize(word_tags[i][0], 'v') + " " + lemmatizer.lemmatize(word_tags[i + 1][0], 'n'))
+				prefix = lemmatizer.lemmatize(word_tags[i][0], 'v')
+				suffix = lemmatizer.lemmatize(word_tags[i + 1][0], 'n')
+
+				if prefix not in stop_words and suffix not in stop_words:
+					phrase_list.append(prefix + " " + suffix)
+				
 				i += 2	
 		elif word_tags[i][1][0] == 'J' and word_tags[i + 1][1][0] == 'N':
-			phrase_list.append(lemmatizer.lemmatize(word_tags[i][0], 'a') + " " + lemmatizer.lemmatize(word_tags[i + 1][0], 'n'))
+			prefix = lemmatizer.lemmatize(word_tags[i][0], 'a')
+			suffix = lemmatizer.lemmatize(word_tags[i + 1][0], 'n')
+
+			if prefix not in stop_words and suffix not in stop_words:
+				phrase_list.append(prefix + " " + suffix)
+		
 			i += 2
 		else:
 			i += 1
 
 	if i != 0 and i == len(word_tags) - 2 and word_tags[i + 1][1][0] == 'N':
 		if word_tags[i][1][0] == 'J':
-			phrase_list.append(lemmatizer.lemmatize(word_tags[i][0], 'a') + lemmatizer.lemmatize(word_tags[i + 1][0], 'n'))
+			prefix = lemmatizer.lemmatize(word_tags[i][0], 'a')
+			suffix = lemmatizer.lemmatize(word_tags[i + 1][0], 'n')
+
+			if prefix not in stop_words and suffix not in stop_words:
+				phrase_list.append(prefix + " " + suffix)
 		
-		if word_tags[i][1][0] == 'V':
-			phrase_list.append(lemmatizer.lemmatize(word_tags[i][0], 'v') + lemmatizer.lemmatize(word_tags[i + 1][0], 'n'))
+		elif word_tags[i][1][0] == 'V':
+			prefix = lemmatizer.lemmatize(word_tags[i][0], 'v')
+			suffix = lemmatizer.lemmatize(word_tags[i + 1][0], 'n')
+
+			if prefix not in stop_words and suffix not in stop_words:
+				phrase_list.append(prefix + " " + suffix)
 	
 	return candidate_list + phrase_list
 				
@@ -116,7 +142,7 @@ def generate_candidate(word_tags):
 def calc_tf_idf(candidate_list):
 	if corpus == None:
 		import_corpus()
-
+	
 	count = Counter(candidate_list)
 	common_word = count.most_common(150)
 	
@@ -137,13 +163,14 @@ def calc_tf_idf(candidate_list):
 
 
 def extract_tags(text, description = '', count = 30):
-	candidate_list = generate_candidate(preprocess_postag(description + text + description))
+	word_tags = preprocess_postag(description + text + description)
+	candidate_list = generate_candidate(word_tags)
 
 	candidate_tags = calc_tf_idf(candidate_list)
 	interset_tags = map(lambda tag: tag[0], candidate_tags)
 
 	res_tags = []
-	filter_set = set()
+	filter_set = set(["wish", "hope", "home"])
 
 	for item in interset_tags:
 		if len(res_tags) >= count:
@@ -152,7 +179,7 @@ def extract_tags(text, description = '', count = 30):
 		word_list = item.split(' ')
 
 		if len(word_list) == 1:
-			if item not in filter_set:
+			if item not in filter_set and len(item) > 2:
 				res_tags.append(item)
 				filter_set.add(item)
 		else:

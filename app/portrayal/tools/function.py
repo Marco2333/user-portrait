@@ -23,7 +23,7 @@ def get_stop_words(file_path = PROJECT_PATH + "portrayal/resource/stop_words.txt
 	    stop_words.add(line[0 : -1])
 
 	file.close()  
-
+	
 	return stop_words
 
 
@@ -94,12 +94,12 @@ def split_tweets_same_time(tweets = [], period = 1):
 	return tweets_list if len(tweets_list[-1]) > 40 else tweets_list[0 : -1]
 
 
-def split_tweets_same_count(tweets = [], count = 80):
-	count = count if count <= 150 else 150
-	count = count if count >= 60 else 60
+def split_tweets_same_count(tweets = [], count = 50):
+	count = count if count <= 100 else 100
+	count = count if count >= 30 else 30
 
 	if len(tweets) < 1200:
-		count = 60
+		count = 36
 
 	tts = []
 	tweets_list = []
@@ -114,7 +114,7 @@ def split_tweets_same_count(tweets = [], count = 80):
 			tts = []
 			i = 0
 
-	if len(tts) > 40:
+	if len(tts) > 20:
 		tweets_list.append(tts)
 
 	return tweets_list
