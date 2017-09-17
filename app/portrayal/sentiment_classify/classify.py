@@ -80,8 +80,8 @@ class VotingClassifier:
 			self.words_feature = pickle.load(feature_file)
 			feature_file.close()
 
-		word_list = preprocess_del_stopwords(document)
-
+		word_list = set(preprocess_del_stopwords(document))
+		
 		if not word_list:
 			return None
 		

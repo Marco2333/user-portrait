@@ -67,31 +67,45 @@ def sentiment_with_time(tweets, time_span = 1):
 	sequence2 = []
 	for tts in tweets_list:
 		res = classify(tts)
+
 		if res == 'pos':
 			sequence1.append(1)
-		if res == 'neg':
+		elif res == 'neg':
 			sequence1.append(-1)
+		else:
+			sequence1.append(0)
 	
 		score = calc_sentiment_score(tts)
-		sequence2.append(score)
+
+		if not score:
+			sequence2.append(0)
+		else:
+			sequence2.append(score)
 		
 	return sequence1, sequence2
 
 
-def sentiment_with_count(tweets, count = 50):
+def sentiment_with_count(tweets, count = 66):
 	tweets_list = split_tweets_same_count(tweets, count)
 
 	sequence1 = []
 	sequence2 = []
 	for tts in tweets_list:
 		res = classify(tts)
+		
 		if res == 'pos':
 			sequence1.append(1)
-		if res == 'neg':
+		elif res == 'neg':
 			sequence1.append(-1)
+		else:
+			sequence1.append(0)
 	
 		score = calc_sentiment_score(tts)
-		sequence2.append(score)
+
+		if not score:
+			sequence2.append(0)
+		else:
+			sequence2.append(score)
 
 	return sequence1, sequence2
 
@@ -99,9 +113,8 @@ def sentiment_with_count(tweets, count = 50):
 def exe_sentiment_classify(tweets):
 	tweets = replace_emotion(tweets)
 
-	psy_with_count1, psy_with_count2 = sentiment_with_count(tweets)
-
 	psy_with_time1, psy_with_time2 = sentiment_with_time(tweets)
+	psy_with_count1, psy_with_count2 = sentiment_with_count(tweets)
 
 	count = 0
 	for item in psy_with_time2:
@@ -113,7 +126,7 @@ def exe_sentiment_classify(tweets):
 	if count > 0:
 		final_sentiment = 1
 	
-	if count < 0:
+	elif count < 0:
 		final_sentiment = -1
 	
 	else:

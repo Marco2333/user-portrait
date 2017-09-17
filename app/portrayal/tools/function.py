@@ -91,15 +91,15 @@ def split_tweets_same_time(tweets = [], period = 1):
 	if len(tts) != 0:
 		tweets_list.append(tts)
 
-	return tweets_list if len(tweets_list[-1]) > 40 else tweets_list[0 : -1]
+	return tweets_list if len(tweets_list[-1]) > 30 else tweets_list[0 : -1]
 
 
-def split_tweets_same_count(tweets = [], count = 50):
+def split_tweets_same_count(tweets = [], count = 66):
 	count = count if count <= 100 else 100
-	count = count if count >= 30 else 30
+	count = count if count >= 40 else 40
 
 	if len(tweets) < 1200:
-		count = 36
+		count = 40
 
 	tts = []
 	tweets_list = []
@@ -114,7 +114,7 @@ def split_tweets_same_count(tweets = [], count = 50):
 			tts = []
 			i = 0
 
-	if len(tts) > 20:
+	if len(tts) > 30:
 		tweets_list.append(tts)
 
 	return tweets_list
