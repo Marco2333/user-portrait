@@ -160,6 +160,7 @@ describe
 described
 despite
 did
+didn
 didn't
 differ
 different
@@ -348,6 +349,7 @@ instead
 into
 inward
 is
+isn
 isn't
 it
 it'd

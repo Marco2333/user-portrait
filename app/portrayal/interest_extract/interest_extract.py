@@ -170,7 +170,7 @@ def extract_tags(text, description = '', count = 30):
 	interset_tags = map(lambda tag: tag[0], candidate_tags)
 
 	res_tags = []
-	filter_set = set(["wish", "hope", "home"])
+	filter_set = set(["wish", "hope", "home", "fuck", "shit", "bitch"])
 
 	for item in interset_tags:
 		if len(res_tags) >= count:

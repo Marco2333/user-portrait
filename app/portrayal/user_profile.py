@@ -7,7 +7,7 @@ from influence.calculate_influence import calculate_influence, calc_activity_seq
 def user_profile(user):
 	tweets = user['tweets']
 	
-	final_sentiment, psy_with_time1, psy_with_time2, psy_with_count1, psy_with_count2 = sentiment_classify.sentiment_with_time(tweets)
+	final_sentiment, psy_with_time1, psy_with_time2, psy_with_count1, psy_with_count2 = sentiment_classify.exe_sentiment_classify(tweets)
 	user['psy'] = final_sentiment
 	user['psy_with_time1'] = psy_with_time1
 	user['psy_with_time2'] = psy_with_time2
