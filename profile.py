@@ -26,7 +26,6 @@ def restore():
 		
 		if item in res_temp:
 			continue
-
 		
 		user = crawler.get_user_all_info(user_id = item)
 		user = UserProfile.UserProfileFromDic(user)
@@ -148,11 +147,11 @@ if __name__ == '__main__':
 
 	user_list = []
 	while 1:
-	    lines = file.readlines(100000)
-	    if not lines:
-	        break
-	    for line in lines:
-	        user_list.append(line.strip())
+		lines = file.readlines(100000)
+		if not lines:
+			break
+		for line in lines:
+			user_list.append(line.strip())
 
 	user_list = list(set(user_list))
 	portrait_new_users(user_list)

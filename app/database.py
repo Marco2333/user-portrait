@@ -42,7 +42,7 @@ class MongoDB:
 class Neo4j:
 	def connect(self):
 		graph = Graph(NEO4J['DB_HOST'], 
-				     username = NEO4J['DB_USER'], 
-				     password = NEO4J['DB_PASSWORD'])
+					 username = NEO4J['DB_USER'], 
+					 password = NEO4J['DB_PASSWORD'])
 
 		return graph

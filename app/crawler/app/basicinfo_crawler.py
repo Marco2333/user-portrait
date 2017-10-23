@@ -47,12 +47,12 @@ class BasicinfoCrawler:
 
 	Parameters:
 		user_id (int, optional):
-            The id of the user to retrieve.
-        screen_name (str, optional):
-            The screen name of the user for whom to return results for.
-            Either a user_id or screen_name is required for this method.
-        include_entities (bool, optional):
-            The entities node will be omitted when set to False.
+			The id of the user to retrieve.
+		screen_name (str, optional):
+			The screen name of the user for whom to return results for.
+			Either a user_id or screen_name is required for this method.
+		include_entities (bool, optional):
+			The entities node will be omitted when set to False.
 	Returns:
 		A twitter.User instance representing that user
 	'''

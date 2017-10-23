@@ -1,34 +1,36 @@
 # coding=utf-8
+from app.database import Neo4j, MongoDB
 from py2neo import Graph, Node, Relationship
 
-from app.database import Neo4j, MongoDB
 
-
-'''	
+'''
 创建neo4j节点及关系
 '''
 def create_relation():
 	graph = Neo4j().connect()
 	mongo = MongoDB().connect()
 
+	# 清空neo4j数据库
 	# graph = graph.delete_all()
 
 	tus = mongo['typical'].find({}, {'_id': 1})
 
 	for item in tus:
+		# 创建用户节点
 		user = Node("Typical", user_id = item['_id'])
 		graph.create(user)
 
 	tus = mongo['relation'].find({}, {'_id': 1})
 	user_list = map(lambda item: item['_id'], tus)
 
+	# 创建用户节点之间的关系
 	for user_id in user_list:
 		friends = mongo['relation'].find_one({'_id': user_id})
 		friends = set(friends['friends'])
 
 		node1 = graph.find_one("Typical",
 							   property_key = "user_id",
-  							   property_value = user_id)
+							   property_value = user_id)
 
 		for user_id1 in user_list:
 			if user_id1 == user_id:
@@ -36,11 +38,10 @@ def create_relation():
 
 			if user_id1 in friends:
 				node2 = graph.find_one("Typical",
-							   		   property_key = "user_id",
-  							   		   property_value = user_id1)
+									   property_key = "user_id",
+  									   property_value = user_id1)
 
 				following = Relationship(node1, 'following', node2)
-				
 				graph.create(following)
 
 

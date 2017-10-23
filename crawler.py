@@ -6,6 +6,8 @@ from crawler.app.tweets_crawler import TweetsCrawler
 relation_crawler = RelationCrawler()
 tweets_crawler = TweetsCrawler()
 
+
+# 同步典型人物的关系信息
 def get_friends():
 	client = MongoClient('127.0.0.1', 27017)
 	db = client['twitter']
@@ -53,6 +55,7 @@ def get_friends():
 		})
 	
 
+# 获取所有用户的朋友信息
 def get_all_users_friends(user_list):
 	client = MongoClient('127.0.0.1', 27017)
 	db = client['twitter']
