@@ -45,18 +45,17 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
-/portrayal/
-/app/portrayal/career_classify/data
-/app/portrayal/career_classify/data_category
-/app/portrayal/career_classify/data_processed
-/app/portrayal/career_classify/data_pruned
-/app/portrayal/career_classify/pickle
-/app/portrayal/career_classify/pickle_category
-/app/portrayal/career_classify/statistics
-/app/portrayal/interest_extract/data
-/app/portrayal/interest_extract/pickle
-/app/portrayal/sentiment_classify/data
-/app/portrayal/sentiment_classify/data1
-/app/portrayal/sentiment_classify/pickle
+/portrayal/career_classify/data
+/portrayal/career_classify/data_category
+/portrayal/career_classify/data_processed
+/portrayal/career_classify/data_pruned
+/portrayal/career_classify/pickle
+/portrayal/career_classify/pickle_category
+/portrayal/career_classify/statistics
+/portrayal/interest_extract/data
+/portrayal/interest_extract/pickle
+/portrayal/sentiment_classify/data
+/portrayal/sentiment_classify/data1
+/portrayal/sentiment_classify/pickle
 .pyc
 config.py
