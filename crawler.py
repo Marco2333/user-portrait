@@ -1,12 +1,44 @@
-# from crawler.extension import main
 from pymongo import MongoClient
-from crawler.app.relation_crawler import RelationCrawler
-from crawler.app.tweets_crawler import TweetsCrawler
+from crawler.tweets_crawler import TweetsCrawler
+from crawler.relation_crawler import RelationCrawler
 
-relation_crawler = RelationCrawler()
 tweets_crawler = TweetsCrawler()
+relation_crawler = RelationCrawler()
 
 
+'''
+获取用户基础信息和推文信息，以字典形式返回
+'''
+def get_user_all_info(user_id = None, screen_name = None):
+	user = basicinfo_crawler.get_user(user_id = user_id, screen_name = screen_name)
+	tweets = tweets_crawler.get_user_all_timeline_return(user_id = user_id, screen_name = screen_name)
+
+	return {
+		'user_id': long(user.id),
+		'screen_name': user.screen_name,
+		'name': user.name,
+		'verified': user.verified,
+		'friends_count': user.friends_count,
+		'description': user.description,
+		'crawler_date': time.strftime('%Y-%m-%d',time.localtime(time.time())),
+		'followers_count': user.followers_count,
+		'location': user.location,
+		'statuses_count': user.statuses_count,
+		'favourites_count': user.favourites_count,
+		'lang': user.lang,
+		'utc_offset': user.utc_offset,
+		'protected': user.protected,
+		'profile_background_color': user.profile_background_color,
+		'default_profile_image': user.default_profile_image,
+		'created_at': user.created_at,
+		'profile_banner_url': user.profile_banner_url,
+		'time_zone': user.time_zone,
+		'profile_image_url': user.profile_image_url,
+		'listed_count': user.listed_count,
+		'tweets': tweets
+	}
+
+	
 # 同步典型人物的关系信息
 def get_friends():
 	client = MongoClient('127.0.0.1', 27017)
@@ -81,7 +113,3 @@ def get_all_users_friends(user_list):
 			'_id': user_id,
 			'friends': friends
 		})
-
-
-if __name__ == '__main__':
-	print tweets_crawler.get_user_timeline(screen_name = 'mrmarcohan')[0]

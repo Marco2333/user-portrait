@@ -2,16 +2,15 @@
 import re
 # import nltk
 
-from app.database import MongoDB
-from app.portrayal.config import PROJECT_PATH
+from crawler.database import MongoDB
+from portrayal.config import PROJECT_PATH
 # from nltk.tokenize import word_tokenize
-# from app.portrayal.tools import preprocess
-# from app.portrayal.career_classify import training, classify
-# from app.portrayal.career_classify import preprocess as training_preprocess
-from app.portrayal.interest_extract import interest_extract
-from app.portrayal.sentiment_classify import sentiment_classify
-# from app.portrayal.tools import preprocess
-# from app.portrayal.user_profile import user_profile
+# from portrayal.tools import preprocess
+# from portrayal.career_classify import training, classify
+from portrayal.interest_extract import interest_extract
+from portrayal.sentiment_classify import sentiment_classify
+# from portrayal.tools import preprocess
+# from portrayal.user_profile import user_profile
 
 '''
 职业领域分类
@@ -85,5 +84,3 @@ def calc_sentiment():
 
 if __name__ == "__main__":
 	calc_sentiment()
-	# sentiment_dict.test()
-	# extract_interset()

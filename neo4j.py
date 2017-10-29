@@ -1,6 +1,6 @@
 # coding=utf-8
-from app.database import Neo4j, MongoDB
 from py2neo import Graph, Node, Relationship
+from crawler.database import Neo4j, MongoDB
 
 
 '''
@@ -59,7 +59,7 @@ def update_attr():
 	for item in tus:
 		node = graph.find_one("Typical",
 							  property_key = "user_id",
-  							  property_value = item['_id'])
+							  property_value = item['_id'])
 		node['name'] = item['name']
 		node['category'] = item['category']
 		node['followers_count'] = item['followers_count']
