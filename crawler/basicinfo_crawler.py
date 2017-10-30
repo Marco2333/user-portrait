@@ -41,7 +41,7 @@ class BasicinfoCrawler:
 											 count = count, 
 											 include_entities = include_entities)
 
-	
+
 	'''
 	获取单个用户的信息
 
@@ -67,6 +67,24 @@ class BasicinfoCrawler:
 		return self.get_api().GetUser(user_id = user_id,	
 									  screen_name = screen_name, 
 									  include_entities = include_entities)
+
+
+	'''
+	获取单个用户的基础信息并返回，如果超时则休眠 400s 后返回
+	'''
+	def get_user_sleep(self,
+					   user_id = None,
+					   screen_name = None,
+					   include_entities = True):
+
+		if user_id == None and screen_name == None:
+			return None
+
+		wrapper_func = handle_exception(self.get_user)
+
+		user = wrapper_func(user_id = user_id, screen_name = screen_name, include_entities = include_entities)
+
+		return user
 
 
 	'''

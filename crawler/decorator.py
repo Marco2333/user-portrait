@@ -26,14 +26,13 @@ def generate_decorator(sleep_time = 700):
 							if sleep_count >= API_COUNT:
 								print "sleeping..."
 								sleep_count = 0
-								time.sleep(sleep_time)						
+								time.sleep(sleep_time)
 							continue
 
 						else:
 							print te
 							return None
 					except Exception as ee:
-						print te
 						print ee
 						return None
 

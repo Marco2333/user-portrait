@@ -1,9 +1,14 @@
+#coding=utf-8
+import time
+
 from pymongo import MongoClient
+from crawler.basicinfo_crawler import BasicinfoCrawler
 from crawler.tweets_crawler import TweetsCrawler
 from crawler.relation_crawler import RelationCrawler
 
 tweets_crawler = TweetsCrawler()
 relation_crawler = RelationCrawler()
+basicinfo_crawler = BasicinfoCrawler()
 
 
 '''
