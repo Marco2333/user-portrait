@@ -41,7 +41,7 @@ class BasicinfoCrawler:
 											 count = count, 
 											 include_entities = include_entities)
 
-
+	
 	'''
 	获取单个用户的信息
 
@@ -86,7 +86,7 @@ class BasicinfoCrawler:
 
 		return user
 
-
+		
 	'''
 	获取单个用户的信息并保存（参考 get_user ）
 
