@@ -42,7 +42,7 @@ def generate_user_xml(user):
 	# name
 	name_ele = dom.createElement('name')
 	# 标签增加属性,设置编码方式
-	name_ele.setAttribute("coding", "utf-8")
+	# name_ele.setAttribute("coding", "utf-8")
 	name_text = dom.createTextNode(user['name'])
 	name_ele.appendChild(name_text)
 
@@ -356,7 +356,7 @@ def generate_user_xml(user):
 
 	# 将用户信息写入文件
 	with open(XML_PATH + '%s.xml' % user['screen_name'], 'w') as f:
-		dom.writexml(f, addindent=" ", newl='\n')
+		dom.writexml(f, addindent="    ", newl='\n', encoding="utf-8")
 
 
 	return XML_PATH + '%s.xml' % user['screen_name']

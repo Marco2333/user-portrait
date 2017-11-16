@@ -154,7 +154,7 @@ class SentimentDict:
 					rate *= -0.7
 
 				if "HOP_" in word:
-					rate *= -0.5
+					rate *= -0.4
 					word = word.replace("HOP_", '')
 				
 				word = word.replace("NOT_", '')
