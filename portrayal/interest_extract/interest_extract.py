@@ -8,13 +8,12 @@
 import re
 import os
 import math
-import time
 import pickle
 
 from collections import Counter
 from nltk.stem import WordNetLemmatizer
 
-from .. tools.preprocess import preprocess_postag
+from .. tools.preprocess import preprocess_postag_label
 
 from .. config import PROJECT_PATH
 
@@ -39,7 +38,7 @@ def generate_pickle():
 		for p in file.split("\n"):
 			text += p
 
-		word_tags = preprocess_postag(text)	
+		word_tags = preprocess_postag_label(text)	
 
 		if not word_tags:
 			continue
@@ -78,10 +77,14 @@ def generate_candidate(word_tags):
 	lemmatizer = WordNetLemmatizer()
 
 	for item in word_tags:
-		if item[1][0] == 'N':
-			word = lemmatizer.lemmatize(item[0], 'n')
-			if word not in stop_words:
-				candidate_list.append(word)
+		if item[1][0] == 'N' or item[0][0] == '#':
+			if item[0][0] == '#':
+				candidate_list.append(item[0])
+
+			else:
+				word = lemmatizer.lemmatize(item[0], 'n')
+				if word not in stop_words:
+					candidate_list.append(word)
 		
 	if len(word_tags) == 2 and (word_tags[0][1][0] == 'J' or word_tags[0][1][0] == 'V') and word_tags[1][1][0] == 'N':
 		if word_tags[0][1][0] == 'J':
@@ -97,6 +100,14 @@ def generate_candidate(word_tags):
 
 	i = 0
 	while(i < len(word_tags) - 2):
+		if word_tags[i][0][0] == '#':
+			i += 1
+			continue
+
+		if word_tags[i + 1][0][0] == '#':
+			i += 2
+			continue
+
 		if word_tags[i][1][0] == 'V' and (word_tags[i + 1][1][0] == 'N' or (word_tags[i + 1][1][0] == 'J' and word_tags[i + 2][1][0] == 'N')):
 			if word_tags[i + 1][1][0] == 'J':
 				suffix = lemmatizer.lemmatize(word_tags[i + 1][0], 'a') + " "
@@ -110,15 +121,17 @@ def generate_candidate(word_tags):
 				if prefix not in stop_words and suffix not in stop_words:
 					phrase_list.append(prefix + " " + suffix)
 				
-				i += 2	
+				i += 2
+
 		elif word_tags[i][1][0] == 'J' and word_tags[i + 1][1][0] == 'N':
 			prefix = lemmatizer.lemmatize(word_tags[i][0], 'a')
 			suffix = lemmatizer.lemmatize(word_tags[i + 1][0], 'n')
 
 			if prefix not in stop_words and suffix not in stop_words:
 				phrase_list.append(prefix + " " + suffix)
-		
+
 			i += 2
+
 		else:
 			i += 1
 
@@ -156,12 +169,11 @@ def calc_tf_idf(candidate_list):
 				n += 1
 
 		idf = math.log(corpus_len * 1.0 / n, 10)
-		key = re.sub(r'label(\w+)label', r'#\1' , item[0])
-		tf_idf[key] = item[1] * idf
+		tf_idf[item[0]] = item[1] * idf
 
 	candidate_list = sorted(tf_idf.iteritems(), key = lambda item: item[1], reverse = True)
 
-	return candidate_list[:100]
+	return candidate_list[:90]
 
 
 def calc_weight(tweets, candidates):
@@ -223,7 +235,7 @@ def text_rank(tweets, candidates_list):
 				related_items[item].append(sub_item)
 
 	i = 0
-	while i < 100:
+	while i < 88:
 		score_vector_temp = {}
 
 		for item in candidates:
@@ -254,7 +266,7 @@ def calc_differ(score_vector1, score_vector2):
 	return differ
 
 
-def top_tfidf_tags(candidate_tags, count, filter_set):
+def get_top_tags(candidate_tags, count, filter_set):
 	interset_tags = map(lambda tag: tag[0], candidate_tags)
 
 	res_tags = []
@@ -282,44 +294,39 @@ def top_tfidf_tags(candidate_tags, count, filter_set):
 	return res_tags[:count]
 
 
-def extract_tags(tweets, description = '', count = 30):
+def join_top_tags(tfidf_tags, textrank_tags, count):
+	final_set = tfidf_tags[:count * 3 / 5]
+
+	for item in tfidf_tags[count * 3 / 5:]:
+		if item[0] == '#':
+			final_set.append(item)
+		
+	for item in textrank_tags:
+		if item not in final_set:
+			final_set.append(item)
+	
+	return final_set[:count]
+
+def extract_tags(tweets, description = '', count = 36):
 	text = ''
 	for tweet in tweets:
-		text += tweet['text']
+		text += tweet['text'] + " , "
 
-	word_tags = preprocess_postag(description + text + description)
+	word_tags = preprocess_postag_label(description + text + description)
 	candidate_list = generate_candidate(word_tags)
 
-	filter_set = set(["wish", "hope", "home", "fuck", "shit", "bitch", "morning", "evening", "afternoon"])
+	filter_set = set(["dis", "fuck", "hell", "damn", "shit", "bitch", "wow", "cool", "fun", "glad",
+		"luck", "laugh", "bless", "appreciate", "wish", "hope", "play", "set", "close", "talk",
+		"change", "join", "move", "watch", "meet", "post", "wait", "live", "deal", "eat", "call",
+		"pick", "start", "end", "kid", "boy", "home", "tweet", "video", "bang",
+		"year", "month", "hour", "minute", "second", "moment", "morning", "afternoon", "evening"])
 
 	candidate_tags = calc_tf_idf(candidate_list)
-	tfidf_tags = top_tfidf_tags(candidate_tags, count, filter_set)
-
+	tfidf_tags = get_top_tags(candidate_tags, count, filter_set)
+	
 	candidate_tags = text_rank(tweets, candidate_tags)
+	textrank_tags = get_top_tags(candidate_tags, count, filter_set)
 
-	final_set = set(tfidf_tags[:count * 2 / 3])
+	tfidf_tags = join_top_tags(tfidf_tags, textrank_tags, count)
 
-	for item in tfidf_tags[count * 2 / 3:]:
-		if item[0] == '#':
-			final_set.add(item)
-
-	while len(final_set) < count:
-		item = candidate_tags.pop(0)[0]
-
-		item_temp = item.replace('#', '')
-		word_list = item.split(' ')
-
-		if len(word_list) == 1:
-			if item_temp not in filter_set and len(item) > 2:
-				final_set.add(item)
-				filter_set.add(item_temp)
-		else:
-			for word in word_list:
-				if word.strip() != '':
-					filter_set.add(word)
-					if word in final_set:
-						final_set.remove(word)
-			
-			final_set.add(item)
-
-	return list(final_set)[:count]
+	return ','.join(tfidf_tags)

@@ -111,9 +111,12 @@ between
 beyond
 big
 biol
+bit
 both
 brief
 briefly
+bro
+bruh
 but
 by
 c
@@ -154,6 +157,7 @@ course
 currently
 d
 date
+dawg
 day
 definitely
 describe
@@ -178,6 +182,8 @@ downed
 downing
 downs
 downwards
+dub
+dude
 due
 during
 e
@@ -220,6 +226,7 @@ faces
 fact
 facts
 far
+fella
 felt
 few
 ff
@@ -260,7 +267,9 @@ giving
 go
 goes
 going
+gon
 gone
+goo
 good
 goods
 got
@@ -274,6 +283,7 @@ guy
 God
 god
 h
+haa
 haha
 had
 hadn't
@@ -287,6 +297,7 @@ having
 he
 he's
 hed
+heh
 hello
 help
 hence
@@ -391,15 +402,18 @@ life
 like
 liked
 likely
+lil
 line
 link
 little
+lmao
 long
 longer
 longest
 look
 looking
 looks
+lot
 ltd
 m
 made
@@ -409,6 +423,7 @@ makes
 making
 man
 many
+matter
 may
 maybe
 me
@@ -467,6 +482,7 @@ non
 none
 nonetheless
 noone
+nope
 nor
 normally
 nos
@@ -642,11 +658,13 @@ sides
 similar
 similarly
 since
+sir
 six
 slightly
 small
 smaller
 smallest
+smh
 so
 some
 somebody
@@ -729,6 +747,7 @@ think
 thinks
 third
 this
+tho
 thorough
 thoroughly
 those
@@ -846,6 +865,7 @@ while
 whim
 whither
 who
+whoa
 who'll
 who's
 whod
@@ -865,6 +885,7 @@ within
 without
 won't
 wonder
+woohoo
 words
 work
 worked
