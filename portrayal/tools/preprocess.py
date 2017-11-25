@@ -5,12 +5,13 @@ import nltk
 
 from nltk.tokenize import word_tokenize
 
-from function import get_stop_words
+from function import get_stop_words, get_slang_set
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 stop_words = get_stop_words()
+slang_set = get_slang_set()
 
 def data_cleaning(text):
 	# clear @/#/链接/RT
@@ -55,9 +56,8 @@ def preprocess_postag(text):
 	text = text.lower()
 	text = re.sub(r"(\w)\1{2,}", r"\1\1", text)
 	text = re.sub(r"(..)\1{2,}", r"\1\1", text)
-	text = re.sub(r'#(\w+)', "label\g<1>label ", text)
 	text = re.sub(r'(rt)?\s?@\w+:?|#|hahah\w*|(ht|f)tp[^\s]+', " ", text)
-	text = text.replace('new york', "newyork").replace('lol', "laugh")
+	text = text.replace('lol', "laugh")
 
 	try:
 		words = word_tokenize(text)
@@ -71,4 +71,28 @@ def preprocess_postag(text):
 		if item[0] not in stop_words and item[0].isalpha():
 			res.append(item)
 	
+	return res
+
+
+def preprocess_postag_label(text):
+	text = text.lower()
+	text = re.sub(r"(\w)\1{2,}", r"\1\1", text)
+	text = re.sub(r"(..)\1{2,}", r"\1\1", text)
+	text = re.sub(r'#(\w+)', "label\g<1>label ", text)
+	text = re.sub(r'(rt)?\s?@\w+:?|#|hahah\w*|(ht|f)tp[^\s]+', " ", text)
+	text = text.replace('new york', "newyork")
+
+	try:
+		words = word_tokenize(text)
+		word_tags = nltk.pos_tag(words)
+	except Exception as e:
+		print e
+		return None
+	
+	res = []
+	for item in word_tags:
+		if item[0] not in stop_words and item[0].isalpha() and item[0] not in slang_set:
+			word = re.sub(r'label(\w+)label', r'#\1' , item[0])
+			res.append((word, item[1]))
+
 	return res

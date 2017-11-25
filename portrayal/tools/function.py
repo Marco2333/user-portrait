@@ -6,6 +6,7 @@ from .. config import PROJECT_PATH
 
 slang = None
 stop_words = None
+slang_set = None
 
 '''
 读取停用词
@@ -18,11 +19,11 @@ def get_stop_words(file_path = PROJECT_PATH + "portrayal/resource/stop_words.txt
 	else:
 		return stop_words
 
-	file = open(file_path, "r")  
-	for line in file:  
-	    stop_words.add(line[0 : -1])
+	file = open(file_path, "r")
+	for line in file:
+		stop_words.add(line[0 : -1])
 
-	file.close()  
+	file.close()
 	
 	return stop_words
 
@@ -38,14 +39,35 @@ def get_slang(file_path = PROJECT_PATH + "portrayal/resource/slang.txt"):
 	else:
 		return slang
 
-	file = open(file_path, "r")  
-	for line in file:  
+	file = open(file_path, "r")
+	for line in file:
 		l_l = line.split(":")
 		slang[l_l[0].strip()] = l_l[1]
 
-	file.close()  
+	file.close()
 
 	return slang
+
+
+'''
+读取俚语
+'''
+def get_slang_set(file_path = PROJECT_PATH + "portrayal/resource/slang.txt"):
+	global slang_set
+
+	if not slang_set:
+		slang_set = set()
+	else:
+		return slang_set
+
+	file = open(file_path, "r")
+	for line in file:
+		l_l = line.split(":")
+		slang_set.add(l_l[0].strip())
+
+	file.close()
+
+	return slang_set
 
 
 '''
@@ -91,7 +113,7 @@ def split_tweets_same_time(tweets = [], period = 1):
 	if len(tts) != 0:
 		tweets_list.append(tts)
 
-	return tweets_list if len(tweets_list[-1]) > 30 else tweets_list[0 : -1]
+	return tweets_list if len(tweets_list[-1]) > 20 else tweets_list[0 : -1]
 
 
 def split_tweets_same_count(tweets = [], count = 66):
@@ -114,7 +136,7 @@ def split_tweets_same_count(tweets = [], count = 66):
 			tts = []
 			i = 0
 
-	if len(tts) > 30:
+	if len(tts) > 20:
 		tweets_list.append(tts)
 
 	return tweets_list

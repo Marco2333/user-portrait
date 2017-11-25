@@ -57,5 +57,7 @@ Temporary Items
 /portrayal/sentiment_classify/data
 /portrayal/sentiment_classify/data1
 /portrayal/sentiment_classify/pickle
-.pyc
+/portrayal/resource/tag_cloud
+/portrayal/resource/users_xml
+*.pyc
 config.py

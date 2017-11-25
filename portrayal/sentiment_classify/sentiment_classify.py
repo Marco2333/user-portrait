@@ -111,6 +111,9 @@ def sentiment_with_count(tweets, count = 66):
 
 
 def exe_sentiment_classify(tweets):
+	if not tweets or len(tweets) == 0:
+		return None
+
 	tweets = replace_emotion(tweets)
 
 	psy_with_time1, psy_with_time2 = sentiment_with_time(tweets)
@@ -120,7 +123,7 @@ def exe_sentiment_classify(tweets):
 	for item in psy_with_time2:
 		if item > 0:
 			count += 1
-		else:
+		elif item < 0:
 			count -= 1
 
 	if count > 0:

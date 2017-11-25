@@ -30,7 +30,7 @@ def calc_parameters(tweets):
 		# 转推
 		if re.match(r"^RT @[\w|\d|_]+", tweet["text"]) != None:
 			rt_count += 1
-		   
+
 		# 非转推
 		else:
 			retweet_count = tweet["retweet_count"]
@@ -46,8 +46,8 @@ def calc_parameters(tweets):
 			if favorite_count > origin_favorite_max:
 				origin_favorite_max = favorite_count
 		
-	origin_retweet_average =  origin_retweet_count * 1.0 / origin_count if origin_count else 0
-	origin_favorite_average =  origin_favorite_count * 1.0 / origin_count if origin_count else 0
+	origin_retweet_average = origin_retweet_count * 1.0 / origin_count if origin_count else 0
+	origin_favorite_average = origin_favorite_count * 1.0 / origin_count if origin_count else 0
 
 	return tweet_start_time, tweet_end_time, origin_count, rt_count, origin_retweet_count, \
 	origin_retweet_average, origin_retweet_max, origin_favorite_count, origin_favorite_average, origin_favorite_max
@@ -77,7 +77,7 @@ def calc_parameters_4sequence(tweets):
 '''
 def calc_activity(origin_count, rt_count, time_span):
 	time_span = time_span if time_span else 1
-	rate =  1000.0 / time_span
+	rate = 1000.0 / time_span
 	total = 0.65 * math.log(origin_count * rate + 1) + 0.35 * math.log(rt_count * rate + 1)
 
 	return total
@@ -105,7 +105,7 @@ def calc_activity_sequence(tweets, period = 1):
 计算推文影响力
 '''
 def calc_tweet_influence(origin_retweet_count, origin_retweet_average, origin_retweet_max, \
-							  origin_favorite_count, origin_favorite_average, origin_favorite_max):
+							 origin_favorite_count, origin_favorite_average, origin_favorite_max):
 	retweet_rate = 0.45 * math.log(origin_retweet_count + 1) + 0.35 * math.log(origin_retweet_average + 1) + 0.2 * math.log(origin_retweet_max + 1)
 	favorite_rate = 0.45 * math.log(origin_favorite_count + 1) + 0.35 * math.log(origin_favorite_average + 1) + 0.2 * math.log(origin_favorite_max + 1)
 

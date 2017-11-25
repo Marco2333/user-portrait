@@ -49,14 +49,14 @@ class TweetsCrawler:
 		if user_id == None and screen_name == None:
 			return None
 
-		return  self.get_api().GetUserTimeline(user_id = user_id,
-											   screen_name = screen_name,
-											   since_id = since_id,
-											   max_id = max_id,
-											   count = count,
-											   include_rts = include_rts,
-											   trim_user = trim_user,
-											   exclude_replies = exclude_replies)
+		return self.get_api().GetUserTimeline(user_id = user_id,
+											  screen_name = screen_name,
+											  since_id = since_id,
+											  max_id = max_id,
+											  count = count,
+											  include_rts = include_rts,
+											  trim_user = trim_user,
+											  exclude_replies = exclude_replies)
 
 
 	'''
@@ -76,7 +76,11 @@ class TweetsCrawler:
 			return None
 
 		if user_id:
-			user_id = long(user_id)
+			try:
+				user_id = long(user_id)
+			except Exception as e:
+				print e
+				return None
 			
 		flag = True
 		tweets = [0]
@@ -108,6 +112,10 @@ class TweetsCrawler:
 
 			except error.TwitterError as te:
 				try:
+					if te.message == 'Not authorized.':
+						print 'Not authorized.'
+						return
+
 					if te.message[0]['code'] == 88:
 						sleep_count += 1
 
@@ -128,9 +136,14 @@ class TweetsCrawler:
 				
 			for tt in tweets:
 				tweet = self.tweetobj_to_dict(tt)
+
+				if not tweet:
+					continue
+
 				try:
 					collect.insert_one(tweet)
 				except Exception as e:
+					print e
 					continue
 	
 
@@ -147,7 +160,11 @@ class TweetsCrawler:
 			return None
 
 		if user_id:
-			user_id = long(user_id)
+			try:
+				user_id = long(user_id)
+			except Exception as e:
+				print e
+				return None
 
 		flag = True
 		tweets = [0]
@@ -179,6 +196,10 @@ class TweetsCrawler:
 
 			except error.TwitterError as te:
 				try:
+					if te.message == 'Not authorized.':
+						print 'Not authorized.'
+						return None
+
 					if te.message[0]['code'] == 88:
 						sleep_count += 1
 
@@ -200,6 +221,10 @@ class TweetsCrawler:
 
 			for tt in tweets:
 				tweet = self.tweetobj_to_dict(tt)
+
+				if not tweet:
+					continue
+
 				try:
 					tweet_list.append(tweet)
 				except Exception as e:
@@ -222,7 +247,7 @@ class TweetsCrawler:
 
 	'''
 	def get_all_users_timeline(self,
-							   user_list = None,
+							   user_list = [],
 							   collect_name = "tweets_task",
 							   search_type = "user_id",
 							   include_rts = True,
@@ -295,8 +320,8 @@ class TweetsCrawler:
 		A twitter.Status instance representing that status message
 	'''
 	def get_status(self,
-				   status_id, 
-				   trim_user = True, 
+				   status_id = None,
+				   trim_user = True,
 				   include_entities = True):
 
 		if status_id == None:
@@ -383,32 +408,37 @@ class TweetsCrawler:
 	def tweetobj_to_dict(self, tt):
 		if tt == None:
 			return None
+		
+		try:
+			tweet = {
+				'coordinates': tt.coordinates,  # Coordinates
+				'created_at': tt.created_at, # String
+				'favorite_count': tt.favorite_count, # int
+				'filter_level': tt.filter_level if hasattr(tt, 'filter_level') else '', # String
+				'hashtags': map(lambda x: x.text, tt.hashtags), # {'0': ,'1':}
+				'_id': tt.id_str, # String
+				'in_reply_to_status_id': tt.in_reply_to_status_id,
+				'in_reply_to_user_id': tt.in_reply_to_user_id,
+				'lang': tt.lang, # String
+				'place': tt.place, # Place
+				'possibly_sensitive': tt.possibly_sensitive, # Boolean
+				'retweet_count': tt.retweet_count, # int
+				'source': tt.source, # String
+				'text': tt.text, # String
+				'user_id': tt.user.id, # int
+				'user_mentions': map(lambda x: x.id, tt.user_mentions), # []
+				'withheld_copyright': tt.withheld_copyright, # Boolean
+				'withheld_in_countries': tt.withheld_in_countries, # Array of String
+				'withheld_scope': tt.withheld_scope, #String
+			}
 
-		tweet = {
-			'coordinates': tt.coordinates,  # Coordinates
-			'created_at': tt.created_at, # String
-			'favorite_count': tt.favorite_count, # int
-			'filter_level': tt.filter_level if hasattr(tt, 'filter_level') else '', # String
-			'hashtags': map(lambda x: x.text, tt.hashtags), # {'0': ,'1':}
-			'_id': tt.id_str, # String
-			'in_reply_to_status_id': tt.in_reply_to_status_id,
-			'in_reply_to_user_id': tt.in_reply_to_user_id,
-			'lang': tt.lang, # String
-			'place': tt.place, # Place
-			'possibly_sensitive': tt.possibly_sensitive, # Boolean
-			'retweet_count': tt.retweet_count, # int
-			'source': tt.source, # String
-			'text': tt.text, # String
-			'user_id': tt.user.id, # int
-			'user_mentions': map(lambda x: x.id, tt.user_mentions), # []
-			'withheld_copyright': tt.withheld_copyright, # Boolean
-			'withheld_in_countries': tt.withheld_in_countries, # Array of String
-			'withheld_scope': tt.withheld_scope, #String
-		}
+		except Exception as e:
+			print e
+			return None
 
 		return tweet
 
 
 if __name__ == '__main__':
 	ts = TweetsCrawler()
-	print ts.get_user_all_timeline(screen_name = 'mrmarcohan')
+	print ts.get_all_status(status_list = ['902427891861831684'])

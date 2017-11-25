@@ -194,20 +194,20 @@ class RelationCrawler:
 	获取用户所有朋友的id，并保存
 	'''
 	# def get_all_friendids(self, 
-	# 					  user_id = None, 
-	# 					  screen_name = None):
+	#					  user_id = None, 
+	#					  screen_name = None):
 
-	# 	cursor = -1
-	# 	while cursor != 0:
-	# 		out = self.get_friendids_paged_sleep(user_id = user_id,
-	# 											 screen_name = screen_name, 
-	# 											 cursor = cursor, 
-	# 											 count = 5000)
-	# 		if not out:
-	# 			return None
+	#	cursor = -1
+	#	while cursor != 0:
+	#		out = self.get_friendids_paged_sleep(user_id = user_id,
+	#											 screen_name = screen_name, 
+	#											 cursor = cursor, 
+	#											 count = 5000)
+	#		if not out:
+	#			return None
 
-	# 		cursor = out[0]
-	# 		friend_list = out[2]
+	#		cursor = out[0]
+	#		friend_list = out[2]
 		
 
 	'''
@@ -263,10 +263,10 @@ class RelationCrawler:
 			return None
 
 		return self.get_api().GetFollowerIDsPaged(user_id = user_id,
-											 	  screen_name = screen_name,
-											 	  cursor = cursor,
-											 	  count = count,
-											 	  stringify_ids = stringify_ids)
+												  screen_name = screen_name,
+												  cursor = cursor,
+												  count = count,
+												  stringify_ids = stringify_ids)
 
 
 	'''
@@ -350,22 +350,22 @@ class RelationCrawler:
 	获取用户所有粉丝的id，并保存
 	'''
 	# def get_all_followersids(self, 
-	# 						 user_id = None, 
-	# 						 screen_name = None):
+	#						 user_id = None, 
+	#						 screen_name = None):
 
-	# 	cursor = -1
-	# 	while cursor != 0:
-	# 		out = self.get_followerids_paged_sleep(user_id = user_id,
-	# 											   screen_name = screen_name, 
-	# 											   cursor = cursor, 
-	# 											   count = 5000)
-	# 		if not out:
-	# 			return None
+	#	cursor = -1
+	#	while cursor != 0:
+	#		out = self.get_followerids_paged_sleep(user_id = user_id,
+	#											   screen_name = screen_name, 
+	#											   cursor = cursor, 
+	#											   count = 5000)
+	#		if not out:
+	#			return None
 
-	# 		cursor = out[0]
-	# 		follower_list = out[2]
+	#		cursor = out[0]
+	#		follower_list = out[2]
 
 
 if __name__ == '__main__':
 	rc = RelationCrawler()
-	print rc.get_followers_paged(screen_name='mrmarcohan')
+	print rc.show_friendship_sleep(source_screen_name='marcohan2333', target_screen_name = 'duncanzym')
