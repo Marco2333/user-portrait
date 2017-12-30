@@ -12,7 +12,6 @@ import math
 import nltk
 import pickle
 
-
 from classify import classify
 from nltk.tokenize import word_tokenize
 
@@ -38,11 +37,12 @@ class SentimentDict:
 		res = []
 		but_words = set(["but", "however"])
 		hope_words = set(["hope", "wish"])
-		deny_words = set(['not', "n't", 'no', 'never', 'none', 'hardly', 'isnt'])
+		deny_words = set(['not', "n't", 'no', 'never', 'none', 'hardly', 'isnt', 'doesnt'])
 		degree_words = set(["fairly", "pretty", "quite", "very", "much", "too", "greatly", "highly", "really", "extremely", "so"])
+		filter_set = set(['affected', 'allow', 'allows', 'backed', 'backing', 'backs', 'best', 'better', 'big', 'certain', 'clear', 'clearly', 'good', 'greetings', 'ha', 'haa', 'hah', 'haha', 'hahaa', 'help', 'hid', 'hopefully', 'ignored', 'importance', 'important', 'kind', 'like', 'liked', 'lmao', 'matter', 'miss', 'novel', 'please', 'sorry', 'substantially', 'thk', 'thx', 'thank', 'thanks', 'thanx', 'thaanks', 'true', 'unfortunately', 'useful', 'usefully', 'usefulness', 'want', 'welcome', 'woohoo', 'yeah', 'yeahh', 'yes'])
 
 		for tweet in tweets:
-			text = tweet['text']
+			text = tweet['text'].lower()
 
 			if text == '':
 				continue
@@ -100,7 +100,7 @@ class SentimentDict:
 					hope = True
 					continue
 
-				if not word.isalpha():
+				if not word.isalpha() and not (item[1][0] == 'J' or item[1][0] == 'V' or item[1][0] == 'R' or item[1][0] == 'N'):
 					deny = False
 					degree = False
 					hope = False
@@ -108,7 +108,7 @@ class SentimentDict:
 					if i == 0 or word_tags[i - 1] not in but_words:
 						but = False
 
-				elif word not in stop_words:
+				elif word not in stop_words or word in filter_set:
 					prefix = ""
 					if deny:
 						prefix += "NOT_"
@@ -117,7 +117,13 @@ class SentimentDict:
 					if degree and item[1][0] == 'J':
 						prefix += "TWO_"
 
-					if item[1][0] == 'J' or item[1][0] == 'V' or item[1][0] == 'R' or item[1][0] == 'N':
+					if not word.isalpha():
+						temp_list = word.split(" ")
+						for item_temp in temp_list:
+							if item_temp.isalpha() and (item_temp not in stop_words or item_temp in filter_set):
+								res.append(prefix + item_temp)
+
+					elif item[1][0] == 'J' or item[1][0] == 'V' or item[1][0] == 'R' or item[1][0] == 'N':
 						res.append(prefix + word)
 		
 		return res
@@ -127,7 +133,7 @@ class SentimentDict:
 		if not self.sentiment_dict:
 			self.sentiment_dict = {}
 
-			senti_file = open(module_path + "data/sentiment_words.txt").read()
+			senti_file = open(module_path + "data/sentiment_words1.txt").read()
 
 			for line in senti_file.split("\n"):
 				sp = line.split("\t")
@@ -148,10 +154,10 @@ class SentimentDict:
 
 			if "NOT_" in word:
 				if "TWO_" in word:
-					rate *= 0.4
+					rate *= -0.3
 					word = word.replace("TWO_", '')
 				else:
-					rate *= -0.7
+					rate *= -0.8
 
 				if "HOP_" in word:
 					rate *= -0.4
@@ -162,6 +168,10 @@ class SentimentDict:
 				if "TWO_" in word:
 					rate *= 1.8
 					word = word.replace("TWO_", '')
+
+				if "HOP_" in word:
+					rate *= 0.6
+					word = word.replace("HOP_", '')
 
 			if word in self.sentiment_dict:
 				score += self.sentiment_dict[word] * rate

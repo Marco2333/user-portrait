@@ -14,7 +14,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 
 from sklearn.naive_bayes import MultinomialNB
-
+from sklearn.ensemble import BaggingClassifier
 from .. config import PROJECT_PATH
 
 module_path = PROJECT_PATH + "portrayal/career_classify/"
@@ -59,6 +59,10 @@ def training(dataset_path = module_path + "data_processed", pickle_path = module
 	tf_idf_feature_matrix = tf_idf_transformer.transform(count_feature_matrix)
 
 	# 多项式贝叶斯分类器分类
+	# multi_classifier = MultinomialNB()
+	# bagging = BaggingClassifier(base_estimator=MultinomialNB(),max_sample=0.5,max_features=0.5,n_estimators=60,n_jobs=-1)
+	# bagging_classifier = bagging.fit(tf_idf_feature_matrix, training_dataset.target)
+	# print "Bagging 学习器完成"
 	multi_classifier = MultinomialNB().fit(tf_idf_feature_matrix, training_dataset.target)
 	print "多项式贝叶斯分类器训练完成"
 

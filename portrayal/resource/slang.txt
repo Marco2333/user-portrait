@@ -4077,7 +4077,6 @@ sgb :straight/gay/bisexual
 sgbadq :Search google before asking dumb questions
 sgi :Still got it
 sgtm :slightly gigling to myself
-sh :shit happens
 shag :fuck
 shawty :girl
 shd :should
@@ -5512,3 +5511,4 @@ zoot :woohoo
 zot :Zero Tolerance
 zt :zoo tycoon
 zup :what's up?
+gna :gonna

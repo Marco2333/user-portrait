@@ -56,8 +56,7 @@ def preprocess_postag(text):
 	text = text.lower()
 	text = re.sub(r"(\w)\1{2,}", r"\1\1", text)
 	text = re.sub(r"(..)\1{2,}", r"\1\1", text)
-	text = re.sub(r'(rt)?\s?@\w+:?|#|hahah\w*|(ht|f)tp[^\s]+', " ", text)
-	text = text.replace('lol', "laugh")
+	text = re.sub(r'(rt)?\s?@\w+:?|#|(ht|f)tp[^\s]+', " ", text)
 
 	try:
 		words = word_tokenize(text)

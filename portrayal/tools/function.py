@@ -42,7 +42,7 @@ def get_slang(file_path = PROJECT_PATH + "portrayal/resource/slang.txt"):
 	file = open(file_path, "r")
 	for line in file:
 		l_l = line.split(":")
-		slang[l_l[0].strip()] = l_l[1]
+		slang[l_l[0].strip()] = l_l[1].strip()
 
 	file.close()
 

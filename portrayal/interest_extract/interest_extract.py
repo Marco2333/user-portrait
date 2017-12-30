@@ -316,9 +316,9 @@ def extract_tags(tweets, description = '', count = 36):
 	candidate_list = generate_candidate(word_tags)
 
 	filter_set = set(["dis", "fuck", "hell", "damn", "shit", "bitch", "wow", "cool", "fun", "glad",
-		"luck", "laugh", "bless", "appreciate", "wish", "hope", "play", "set", "close", "talk",
+		"joy", "luck", "laugh", "bless", "appreciate", "wish", "hope", "play", "set", "close", "talk",
 		"change", "join", "move", "watch", "meet", "post", "wait", "live", "deal", "eat", "call",
-		"pick", "start", "end", "kid", "boy", "home", "tweet", "video", "bang",
+		"pick", "start", "end", "kid", "boy", "home", "tweet", "video", "bang", "dope",
 		"year", "month", "hour", "minute", "second", "moment", "morning", "afternoon", "evening"])
 
 	candidate_tags = calc_tf_idf(candidate_list)

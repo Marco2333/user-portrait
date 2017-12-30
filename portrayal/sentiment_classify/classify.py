@@ -95,5 +95,5 @@ class VotingClassifier:
 voting_classifier = VotingClassifier()
 
 
-def classify(text):
-	return voting_classifier.classify(text)
+def classify(tweets):
+	return voting_classifier.classify(tweets)

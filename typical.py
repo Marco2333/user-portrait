@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*- 
 import re
-import nltk
+# import nltk
 
-from crawler.database import MongoDB, Neo4j
-from portrayal.config import PROJECT_PATH
-from nltk.tokenize import word_tokenize
+from crawler.database import MongoDB
+# from portrayal.config import PROJECT_PATH
+# from nltk.tokenize import word_tokenize
 # from portrayal.tools import preprocess
 # from portrayal.career_classify import training, classify
-from portrayal.interest_extract import interest_extract
-from portrayal.sentiment_classify import sentiment_classify
-from portrayal.sentiment_classify import sentiment_dict as sentiment_dict_classifier
+# from portrayal.interest_extract import interest_extract
+# from portrayal.sentiment_classify import sentiment_classify
+# from portrayal.sentiment_classify import sentiment_dict as sentiment_dict_classifier
 # from portrayal.tools import preprocess
 # from portrayal.user_profile import user_profile
 
-graph = Neo4j().connect()
+# graph = Neo4j().connect()
 
 '''
 职业领域分类
@@ -213,10 +213,15 @@ def update_user_category():
 
 
 if __name__ == "__main__":
-	update_user_category()
-	# db = MongoDB().connect()
-	# users = db['typical'].find({'category': 'Politics'}, {'tweets': 0})
+	# update_user_category()
+	db = MongoDB().connect()
+	users = db['typical'].find_one({'_id': 4418090668})
 
+	for t in users['tweets']:
+		try:
+			print t['text']
+		except Exception as e:
+			continue
 	# count = 0
 	# for user in users:
 	# 	# tags = interest_extract.extract_tags(user['tweets'], user['description'])
