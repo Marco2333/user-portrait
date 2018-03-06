@@ -71,7 +71,7 @@ class TweetsCrawler:
 							  screen_name = None,
 							  include_rts = True,
 							  exclude_replies = False):
-
+	
 		if user_id == None and screen_name == None:
 			return None
 
@@ -143,7 +143,6 @@ class TweetsCrawler:
 				try:
 					collect.insert_one(tweet)
 				except Exception as e:
-					print e
 					continue
 	
 
@@ -441,4 +440,4 @@ class TweetsCrawler:
 
 if __name__ == '__main__':
 	ts = TweetsCrawler()
-	print ts.get_all_status(status_list = ['902427891861831684'])
+	print ts.get_user_all_timeline(screen_name = 'mrmarcohan')

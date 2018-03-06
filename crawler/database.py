@@ -33,7 +33,7 @@ class MongoDB:
 	def connect(self, db_name = MONGO_DB['DB_DATABASE']):
 		client = MongoClient(MONGO_DB['DB_HOST'], MONGO_DB['DB_PORT'])
 		db = client[db_name]
-		# db.authenticate(MONGO_DB['DB_USER'], MONGO_DB['DB_PASSWORD'])
+		db.authenticate(MONGO_DB['DB_USER'], MONGO_DB['DB_PASSWORD'])
 		self.db = db
 
 		return db

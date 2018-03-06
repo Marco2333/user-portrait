@@ -37,6 +37,7 @@ def classify(text = '', pickle_path = module_path + "pickle/"):
 
 	# 分类器
 	classifier_path = pickle_path + 'multi_classifier.pickle'
+	# classifier_path = pickle_path + 'bagging_classifier.pickle'
 
 	# 分类
 	multi_classifier_file = open(classifier_path)
@@ -48,6 +49,8 @@ def classify(text = '', pickle_path = module_path + "pickle/"):
 	categories_file.close()
 
 	category = target_names[multi_classifier.predict(tf_idf_feature_matrix.toarray())[0]]
+	# return category
+
 	score_list = multi_classifier._joint_log_likelihood(tf_idf_feature_matrix.toarray())[0]
 
 	min_value = min(score_list)
