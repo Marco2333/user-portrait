@@ -43,19 +43,22 @@ def generate_user_xml(user):
 	name_ele = dom.createElement('name')
 	# 标签增加属性,设置编码方式
 	# name_ele.setAttribute("coding", "utf-8")
-	name_text = dom.createTextNode(user['name'])
+	_name = user['name'] if user['name'] else ''
+	name_text = dom.createTextNode(_name)
 	name_ele.appendChild(name_text)
 
 
 	# 个人描述
 	des_ele = dom.createElement('简介')
-	des_text = dom.createTextNode(user['description'])
+	_description = user['description'] if user['description'] else ''
+	des_text = dom.createTextNode(_description)
 	des_ele.appendChild(des_text)
 
 
 	# 地理位置
 	location_ele = dom.createElement('地理位置')
-	location_text = dom.createTextNode(user['location'])
+	_location = user['location'] if user['location'] else ''
+	location_text = dom.createTextNode(_location)
 	location_ele.appendChild(location_text)
 
 
@@ -115,13 +118,15 @@ def generate_user_xml(user):
 
 	# 使用语言
 	lang_ele = dom.createElement('语言')
-	lang_text = dom.createTextNode(user['lang'])
+	_lang = user['lang'] if user['lang'] else ''
+	lang_text = dom.createTextNode(_lang)
 	lang_ele.appendChild(lang_text)
 
 
 	# 时区
 	time_zone = dom.createElement('时区')
-	time_text = dom.createTextNode(user['time_zone'])
+	_time_zone = user['time_zone'] if user['time_zone'] else ''
+	time_text = dom.createTextNode(_time_zone)
 	time_zone.appendChild(time_text)
 
 
@@ -145,7 +150,8 @@ def generate_user_xml(user):
 
 	# 背景图片链接
 	banner_ele = dom.createElement('背景图片链接')
-	banner_text = dom.createTextNode(user['profile_banner_url'])
+	_profile_banner_url = user['profile_banner_url'] if user['profile_banner_url'] else ''
+	banner_text = dom.createTextNode(_profile_banner_url)
 	banner_ele.appendChild(banner_text)
 
 	
