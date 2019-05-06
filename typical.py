@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 import re
 # import nltk
 
@@ -12,6 +12,13 @@ from crawler.database import MongoDB
 # from portrayal.sentiment_classify import sentiment_dict as sentiment_dict_classifier
 # from portrayal.tools import preprocess
 # from portrayal.user_profile import user_profile
+
+import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from scipy.interpolate import spline
+
+
 
 # graph = Neo4j().connect()
 
@@ -214,14 +221,14 @@ def update_user_category():
 
 if __name__ == "__main__":
 	# update_user_category()
-	db = MongoDB().connect()
-	users = db['typical'].find_one({'_id': 4418090668})
+	# db = MongoDB().connect()
+	# users = db['typical'].find_one({'_id': 4418090668})
 
-	for t in users['tweets']:
-		try:
-			print t['text']
-		except Exception as e:
-			continue
+	# for t in users['tweets']:
+	# 	try:
+	# 		print t['text']
+	# 	except Exception as e:
+	# 		continue
 	# count = 0
 	# for user in users:
 	# 	# tags = interest_extract.extract_tags(user['tweets'], user['description'])
@@ -247,4 +254,77 @@ if __name__ == "__main__":
 	# 	print nltk.pos_tag(words)
 	# except Exception as e:
 	# 	print e
+	db = MongoDB().connect()
+	users = db['typical'].find()
+
+	count = 1
+	data_set = {
+		'retweet_favorite_rate': [],
+		'fans_retweet_rate': [],
+		'fans_favorite_rate': []
+	}
+	for user in users:
+		tweets = user['tweets']
+		fans = user['followers_count']
+
+		# if fans > 2000000:
+		# 	continue
+		count += 1
+
+		if count > 150:
+			break
+		tweet_count = 0
+		retweet_count = 0
+		favorite_count = 0
+		for tweet in tweets:
+			if 'RT @' not in tweet['text']:
+				tweet_count += 1.
+
+				retweet_count += tweet['retweet_count']
+				favorite_count += tweet['favorite_count']
+		
+		fans_retweet_rate = fans / (retweet_count / tweet_count)
+		if fans_retweet_rate > 600000 or fans_retweet_rate < 50:
+			continue
+		
+		fans_favorite_rate = fans / (favorite_count / tweet_count)
+		if fans_favorite_rate > 600000 or fans_favorite_rate < 50:
+			continue
+		
+		retweet_favorite_rate = (retweet_count / tweet_count) / (favorite_count / tweet_count)
+		# print fans, tweet_count, retweet_count, retweet_count / tweet_count
+		if fans_retweet_rate < 0:
+			print user['_id']
+		data_set['retweet_favorite_rate'].append(retweet_favorite_rate)
+		data_set['fans_retweet_rate'].append(fans_retweet_rate)
+		data_set['fans_favorite_rate'].append(fans_favorite_rate)
+
+	x_axix = range(len(data_set['retweet_favorite_rate']))
+	x_axix = np.array(x_axix)
+	x_axix_new = np.linspace(x_axix.min(), x_axix.max(), 4000)
+
+	y_axix = data_set['retweet_favorite_rate']
+	y_axix_new = spline(x_axix ,y_axix, x_axix_new)
+
+	plt.plot(x_axix_new, y_axix_new, color='green', label='Retweet Favorite Rate')
+
+	y_axix = data_set['fans_retweet_rate']
+	y_axix_new = spline(x_axix ,y_axix, x_axix_new)
+
+	plt.plot(x_axix_new, y_axix_new, color='red', label='Fans Retweet Rate')
+
+	# y_axix = data_set['fans_favorite_rate']
+	# y_axix_new = spline(x_axix, y_axix, x_axix_new)
+	plt.plot(x_axix, y_axix, color='blue', label='Fans Retweet Rate')
+	# plt.plot(x_axix, train_pn_dis,  color='skyblue', label='PN distance')
+	# plt.plot(x_axix, thresholds, color='blue', label='threshold')
+	plt.legend() # 显示图例
+
+	# # print y_axix, x_axix_new
+	# for i in x_axix_new:
+	# 	print i
+	plt.xlabel('Users')
+	plt.ylabel('Rate')
+	plt.show()
+
 	
